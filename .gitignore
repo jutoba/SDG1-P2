@@ -1,0 +1,6 @@
+# Solo se publica la app; el material de la asignatura se queda en local
+*
+!.gitignore
+!README.md
+!index.html
+!practica_parcial2.html

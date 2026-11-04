@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repaso parcial 2 · MCF5272</title>
+<style>
+  :root{
+    --bg:#eef1ef; --surface:#ffffff; --surface-2:#f3f5f3; --line:#ccd4d1;
+    --text:#16211f; --text-muted:#51615d;
+    --accent:#b96a1f; --accent-soft:#f0ddc4; --accent-ink:#2a1700;
+    --accent2:#1f8a7f; --accent2-soft:#dbeeeb;
+    --good:#2f9d5e; --good-soft:#dff3e7; --bad:#d1453f; --bad-soft:#fbe4e2;
+    --mono-bg:#101715; --mono-text:#d8e4e0; --mono-line:#223029;
+    --shadow:0 10px 30px -14px rgba(20,30,28,.25);
+    --f-display:"Bahnschrift SemiBold","Bahnschrift","Segoe UI Semibold","Arial Narrow",sans-serif;
+    --f-body:"Segoe UI",ui-sans-serif,system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --f-mono:"Cascadia Code",ui-monospace,"SF Mono",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11161c; --surface:#1a2129; --surface-2:#212a33; --line:#2d3844;
+      --text:#e7edf0; --text-muted:#93a1ab;
+      --accent:#e08f3c; --accent-soft:#3a2c1a; --accent-ink:#1a1206;
+      --accent2:#52b7ab; --accent2-soft:#17302d;
+      --good:#4ecb86; --good-soft:#123323; --bad:#ec6a63; --bad-soft:#2e1a19;
+      --mono-bg:#0c1014; --mono-text:#cfe8df; --mono-line:#223029;
+      --shadow:0 10px 30px -12px rgba(0,0,0,.55);
+    }
+    :root:not([data-theme="light"]) .rail-btn.active .t, :root:not([data-theme="light"]) .rail-btn.active .s{ color:#fde8cf; }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:var(--f-body); line-height:1.55; font-size:16px; }
+  h1,h2,h3{ font-family:var(--f-display); font-weight:700; text-wrap:balance; margin:0; letter-spacing:.01em; }
+  code,.mono{ font-family:var(--f-mono); font-variant-numeric:tabular-nums; }
+  a{ color:var(--accent2); }
+  button{ font-family:var(--f-body); cursor:pointer; }
+  :focus-visible{ outline:2px solid var(--accent2); outline-offset:2px; }
+  .app{ max-width:1180px; margin:0 auto; padding:0 20px 80px; }
+  .topbar{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; padding:28px 0 18px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ font-family:var(--f-display); font-weight:700; font-size:13px; letter-spacing:.14em; background:var(--text); color:var(--bg); padding:6px 9px; border-radius:3px; line-height:1; }
+  .brand h1{ font-size:26px; }
+  .brand p{ margin:2px 0 0; color:var(--text-muted); font-size:14px; }
+  .scorepill{ display:inline-flex; align-items:center; gap:6px; font-family:var(--f-display); font-size:12.5px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:6px 13px; color:var(--text-muted); }
+  .scorepill strong{ color:var(--accent); }
+  .layout{ display:grid; grid-template-columns:200px 1fr; gap:28px; margin-top:24px; align-items:start; }
+  .layout>*{ min-width:0; }
+  .rail{ position:sticky; top:20px; display:flex; flex-direction:column; gap:6px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px; }
+  @media (max-width:760px){ .layout{ grid-template-columns:1fr; } .rail{ position:static; flex-direction:row; overflow-x:auto; gap:8px; } }
+  .rail-btn{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; border:1px solid transparent; background:transparent; color:var(--text-muted); padding:10px 12px; border-radius:7px; text-align:left; white-space:nowrap; }
+  .rail-btn .t{ font-family:var(--f-display); font-size:14px; color:var(--text); }
+  .rail-btn .s{ font-size:11.5px; color:var(--text-muted); }
+  .rail-btn:hover{ background:var(--surface-2); }
+  .rail-btn.active{ background:var(--accent-soft); border-color:var(--accent); }
+  .rail-btn.active .t,.rail-btn.active .s{ color:var(--accent-ink); }
+  .panel{ display:none; flex-direction:column; gap:18px; }
+  .panel.active{ display:flex; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:20px 22px; box-shadow:var(--shadow); }
+  @media (max-width:520px){ .card{ padding:16px; } }
+  .card h2{ font-size:20px; margin-bottom:6px; }
+  .card h3{ font-size:15.5px; }
+  .card p{ margin:0 0 10px; max-width:70ch; }
+  .muted{ color:var(--text-muted); }
+  .eyebrow{ font-family:var(--f-display); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:6px; }
+  .ex-head{ display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .tag{ font-size:11.5px; font-family:var(--f-display); letter-spacing:.03em; padding:3px 9px; border-radius:999px; background:var(--accent2-soft); color:var(--accent2); border:1px solid var(--accent2); white-space:nowrap; }
+  .tag.gen{ background:var(--accent-soft); color:var(--accent-ink); border-color:var(--accent); }
+  table{ border-collapse:collapse; width:100%; font-size:14px; }
+  .tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:8px; margin:8px 0; }
+  th,td{ padding:7px 10px; border-bottom:1px solid var(--line); text-align:left; }
+  th{ background:var(--surface-2); font-family:var(--f-display); font-size:12.5px; color:var(--text-muted); white-space:nowrap; }
+  tr:last-child td{ border-bottom:none; }
+  .codebox{ background:var(--mono-bg); color:var(--mono-text); border:1px solid var(--mono-line); border-radius:8px; padding:12px 14px; font-family:var(--f-mono); font-size:13px; overflow-x:auto; line-height:1.55; white-space:pre; margin:8px 0; }
+  .fields{ display:flex; flex-wrap:wrap; gap:10px; margin:10px 0; }
+  .field{ display:flex; flex-direction:column; gap:4px; min-width:104px; flex:0 1 auto; max-width:100%; }
+  .field label{ font-size:12px; color:var(--text-muted); font-family:var(--f-display); letter-spacing:.02em; }
+  .field input,.field select{ font-family:var(--f-mono); font-size:14px; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--text); width:100%; max-width:100%; }
+  .casehead{ flex:0 0 100%; font-size:14.5px; font-weight:600; margin-top:6px; padding-top:8px; border-top:1px dashed var(--line); }
+  .casehead:first-child{ border-top:none; margin-top:0; padding-top:0; }
+  .ok{ border-color:var(--good) !important; background:var(--good-soft) !important; }
+  .bad{ border-color:var(--bad) !important; background:var(--bad-soft) !important; }
+  .btnrow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+  .btn{ font-family:var(--f-display); font-size:13px; letter-spacing:.02em; border-radius:7px; padding:9px 16px; border:1px solid var(--line); background:var(--surface-2); color:var(--text); }
+  .btn:hover{ background:var(--line); }
+  .btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .chip{ font-size:13px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); color:var(--text-muted); }
+  .chip.okc{ background:var(--good-soft); border-color:var(--good); color:var(--good); }
+  .chip.badc{ background:var(--bad-soft); border-color:var(--bad); color:var(--bad); }
+  details.solution{ margin-top:10px; border-top:1px dashed var(--line); padding-top:10px; }
+  details.solution summary{ cursor:pointer; font-family:var(--f-display); font-size:13px; color:var(--accent2); }
+  details.solution .body{ margin-top:8px; font-size:14px; }
+  details.solution p{ font-size:14px; margin-bottom:8px; }
+  details.solution ul{ margin:6px 0; padding-left:18px; }
+  details.solution li{ margin-bottom:4px; }
+  details.hoja summary{ cursor:pointer; font-family:var(--f-display); font-size:14px; }
+  details.solution .body{ overflow-x:auto; }
+  svg.fsm{ width:100%; min-width:640px; height:auto; display:block; margin:10px 0; max-width:760px; }
+  svg.fsm text{ font-family:var(--f-body); fill:var(--text); }
+  svg.fsm .st{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5; }
+  svg.fsm .ar{ fill:none; stroke:var(--text-muted); stroke-width:1.5; }
+  svg.fsm .ah{ fill:var(--text-muted); }
+  svg.fsm .sn{ font-family:var(--f-display); font-size:14px; font-weight:700; }
+  svg.fsm .lb{ font-size:11.5px; }
+  .quiz-q{ margin-bottom:12px; }
+  .quiz-opts{ display:flex; flex-direction:column; gap:8px; }
+  .quiz-opt{ text-align:left; border:1px solid var(--line); background:var(--surface-2); border-radius:8px; padding:10px 14px; font-size:14.5px; color:var(--text); }
+  .quiz-opt:hover{ background:var(--line); }
+  .quiz-exp{ margin-top:12px; font-size:14px; color:var(--text-muted); border-top:1px dashed var(--line); padding-top:10px; }
+  footer{ color:var(--text-muted); font-size:12.5px; margin-top:24px; text-align:center; }
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand"><span class="brand-mark">SDGI</span>
+      <div><h1>Repaso para el parcial 2</h1><p>Interrupciones, temporizadores, UART, estados y C en el MCF5272</p></div></div>
+    <span class="scorepill">Aciertos en esta sesión: <strong id="streak">0</strong></span>
+  </div>
+  <div class="layout">
+    <nav class="rail" id="rail"></nav>
+    <main id="main"></main>
+  </div>
+  <footer>Basado en las unidades 4 a 6, sus cuestiones y problemas, y el examen de enero de 2016. Comprueba siempre contra tus apuntes.</footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ---------- utilidades ----------
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rnd(0,a.length-1)];
+const hex=(n,d)=>(n>>>0).toString(16).toUpperCase().padStart(d,'0');
+const bin=(n,d)=>(n>>>0).toString(2).padStart(d,'0');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fnum=(x,d=3)=>String(+x.toFixed(d)).replace('.',',');
+const normHex=s=>String(s).trim().toUpperCase().replace(/^\$/,'').replace(/^0X/,'').replace(/^0+(?=.)/,'');
+const code=s=>`<div class="codebox">${esc(s.replace(/^\n/,'').replace(/\n\s*$/,''))}</div>`;
+const SINO=[['si','Sí'],['no','No']];
+
+// ---------- modelo del MCF5272 (funciones puras) ----------
+const OFF={INT1:1,INT2:2,INT3:3,INT4:4,TMR0:5,TMR1:6,TMR2:7,TMR3:8,UART1:9,UART2:10,PLIP:11,PLIA:12,USB0:13,USB1:14,USB2:15,USB3:16,USB4:17,USB5:18,USB6:19,USB7:20,DMA:21,ERX:22,ETX:23,ENTC:24,QSPI:25,INT5:26,INT6:27,SWTO:28};
+const ICR={1:['INT1','INT2','INT3','INT4','TMR0','TMR1','TMR2','TMR3'],2:['UART1','UART2','PLIP','PLIA','USB0','USB1','USB2','USB3'],3:['USB4','USB5','USB6','USB7','DMA','ERX','ETX','ENTC'],4:['QSPI','INT5','INT6','SWTO']};
+const icrOf=s=>+Object.keys(ICR).find(r=>ICR[r].includes(s));
+const icrValue=m=>{ let v=0,reg=0; Object.keys(m).forEach(s=>{ reg=icrOf(s); v=(v|((8|m[s])<<(28-4*ICR[reg].indexOf(s))))>>>0; }); return v; };
+const vectorAddr=(pivr,s)=>(pivr+OFF[s])*4;
+const pivrFrom=(addr,s)=>addr/4-OFF[s];
+const orderFromIcr1=v=>[0,1,2,3].map(i=>({s:'INT'+(i+1),l:(v>>>(28-4*i))&7,i})).sort((a,b)=>b.l-a.l||a.i-b.i).map(x=>x.s);
+const pitr=edges=>{ const bit={INT1:31,INT2:30,INT3:29,INT4:28,INT5:6,INT6:5}; let v=0; Object.keys(edges).forEach(k=>{ if(edges[k]) v=(v|(1<<bit[k]))>>>0; }); return v; };
+const a7After=(a7,pushed)=>((a7-(a7%4))-8-pushed)>>>0;
+const tmr=o=>((o.ps||0)<<8|(o.ce||0)<<6|(o.om||0)<<5|(o.ori||0)<<4|(o.frr||0)<<3|(o.clk||0)<<1|(o.rst||0))>>>0;
+const tmrDecode=v=>({ps:v>>>8,ce:(v>>6)&3,om:(v>>5)&1,ori:(v>>4)&1,frr:(v>>3)&1,clk:(v>>1)&3,rst:v&1});
+const divOf=clk=>clk===2?16:1;
+const tIrq=(fHz,ps,clk,trr)=>trr*(ps+1)*divOf(clk)/fHz;
+const pwcr=o=>((o.en||0)<<7|(o.frc||0)<<6|(o.lvl||0)<<5|(o.cksl||0))>>>0;
+const fPwm=(f,c)=>f/(256*2**c);
+const ckslClosest=(f,t)=>{ let b=0; for(let c=0;c<=15;c++) if(Math.abs(fPwm(f,c)-t)<Math.abs(fPwm(f,b)-t)) b=c; return b; };
+const ckslAbove=(f,t)=>{ let b=0; for(let c=0;c<=15;c++) if(fPwm(f,c)>t) b=c; return b; };
+const BAUD=[1200,4800,9600,19200];
+const xcr=o=>(o.br<<5|o.dt<<4|o.st<<3|o.pr<<2|o.tx<<1|o.rx)>>>0;
+const xcrDecode=v=>({br:(v>>5)&3,dt:(v>>4)&1,st:(v>>3)&1,pr:(v>>2)&1,tx:(v>>1)&1,rx:v&1});
+const frameLen=(o,guard=0)=>1+(o.dt?8:7)+1+(o.st?2:1)+guard;
+const frameBits=(val,o)=>{ const n=o.dt?8:7, d=bin(val&((1<<n)-1),n), ones=d.split('1').length-1; const par=o.pr?(ones%2?0:1):(ones%2?1:0); return '0'+d+par+(o.st?'00':'0'); };
+const cmpFlags=(d,f)=>{ d>>>=0; f>>>=0; const r=(d-f)>>>0; return {N:r>>>31,Z:r===0?1:0,C:d<f?1:0,V:(((d^f)&(d^r))>>>31)}; };
+const BR={BEQ:x=>x.Z,BNE:x=>!x.Z,BHI:x=>!x.C&&!x.Z,BLS:x=>x.C||x.Z,BCC:x=>!x.C,BCS:x=>x.C,BGT:x=>(x.N===x.V)&&!x.Z,BLE:x=>x.Z||x.N!==x.V,BGE:x=>x.N===x.V,BLT:x=>x.N!==x.V};
+const PROD=[[1,189,'Platanos'],[2,285,'Manzanas Golden'],[3,320,'Tomate pera'],[4,1495,'Queso curado'],[5,3990,'Jamon serrano'],[6,549,'Pollo entero']];
+const precio=(cod,peso,v=0,umbral=0)=>{ const i=PROD.findIndex(p=>p[0]===cod), pk=i<0?0xFFFF:PROD[i][1], idx=i<0?6:i; let p;
+  if(v===1) p=Math.floor(peso/100)*pk; else p=Math.floor(peso*pk/100);
+  p&=0xFFFF; if(v===2&&peso>=umbral) p=(p-Math.floor(p/10))&0xFFFF; return {p,pk,dir:0x100000+24*idx}; };
+const cadena=p=>{ const s=String(p%100000).padStart(5,'0'); return s.slice(0,3)+'.'+s.slice(3); };
+
+// ---------- hoja de consulta ----------
+const HOJA=`<details class="hoja"><summary>Hoja de consulta (la misma información que tienes en el examen)</summary>
+<div class="tablewrap"><table><tr><th>Registro</th><th>Campos, de bit alto a bajo</th></tr>
+<tr><td><code>TMRn</code></td><td><code>PS(15-8) CE(7-6) OM(5) ORI(4) FRR(3) CLK(2-1) RST(0)</code></td></tr>
+<tr><td><code>CLK</code></td><td>00 detiene · 01 reloj del sistema · 10 reloj del sistema / 16 · 11 TINn</td></tr>
+<tr><td><code>CE</code></td><td>00 sin captura · 01 subida · 10 bajada · 11 ambos (con interrupción)</td></tr>
+<tr><td><code>TERn</code></td><td><code>REF(1) CAP(0)</code>; se ponen a 0 escribiendo un 1</td></tr>
+<tr><td><code>XCRn</code></td><td><code>-(7) BR(6-5) DT(4) ST(3) PR(2) TX(1) RX(0)</code></td></tr>
+<tr><td><code>BR</code></td><td>00 1200 · 01 4800 · 10 9600 · 11 19200</td></tr>
+<tr><td><code>XSRn</code></td><td><code>TE(5) OV(4) FR(3) PR(2) TX(1) RX(0)</code></td></tr>
+<tr><td><code>PWCRn</code></td><td><code>EN(7) FRC1(6) LVL(5) CKSL(3-0)</code></td></tr>
+<tr><td><code>PIVR</code></td><td><code>IV(7-5)</code>; los bits 4-0 los pone la fuente</td></tr>
+<tr><td><code>ICR1</code></td><td>INT1 INT2 INT3 INT4 TMR0 TMR1 TMR2 TMR3 (PI + IPL, 4 bits cada una)</td></tr>
+<tr><td><code>ICR2</code></td><td>UART1 UART2 PLIP PLIA USB0 USB1 USB2 USB3</td></tr>
+<tr><td><code>ICR3</code></td><td>USB4 USB5 USB6 USB7 DMA ERX ETX ENTC</td></tr>
+<tr><td><code>ICR4</code></td><td>QSPI INT5 INT6 SWTO</td></tr>
+<tr><td><code>PITR</code></td><td>INT1(31) INT2(30) INT3(29) INT4(28) INT5(6) INT6(5); 1 = subida</td></tr>
+</table></div>
+<div class="tablewrap"><table><tr><th>Offset</th><th>Fuente</th><th>Offset</th><th>Fuente</th></tr>
+<tr><td>0</td><td>Espuria</td><td>13-20</td><td>USB0-USB7</td></tr>
+<tr><td>1-4</td><td>INT1-INT4</td><td>21</td><td>DMA</td></tr>
+<tr><td>5-8</td><td>TMR0-TMR3</td><td>22-24</td><td>ERX, ETX, ENTC</td></tr>
+<tr><td>9-10</td><td>UART1-UART2</td><td>25</td><td>QSPI</td></tr>
+<tr><td>11-12</td><td>PLIP-PLIA</td><td>26-27 · 28</td><td>INT5-INT6 · SWTO</td></tr>
+</table></div>
+<div class="tablewrap"><table><tr><th>CMP f,d</th><th>Sin signo</th><th>Con signo</th><th>TST d</th><th>Sin signo</th><th>Con signo</th></tr>
+<tr><td>d = f</td><td>BEQ</td><td>BEQ</td><td>d = 0</td><td>BEQ</td><td>BEQ</td></tr>
+<tr><td>d ≠ f</td><td>BNE</td><td>BNE</td><td>d ≠ 0</td><td>BNE</td><td>BNE</td></tr>
+<tr><td>d &gt; f</td><td>BHI</td><td>BGT</td><td>d &gt; 0</td><td>BNE</td><td>BGT</td></tr>
+<tr><td>d ≥ f</td><td>BCC</td><td>BGE</td><td>d ≥ 0</td><td>-</td><td>BGE, BPL</td></tr>
+<tr><td>d &lt; f</td><td>BCS</td><td>BLT</td><td>d &lt; 0</td><td>-</td><td>BLT, BMI</td></tr>
+<tr><td>d ≤ f</td><td>BLS</td><td>BLE</td><td>d ≤ 0</td><td>-</td><td>BLE</td></tr>
+</table></div></details>`;
+
+// ---------- diagramas ----------
+let fsmId=0;
+function fsm(w,h,states,arrows){
+  const mid='ah'+(++fsmId);
+  const defs=`<defs><marker id="${mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>`;
+  const a=arrows.map(r=>`<path class="ar" d="${r.d}" marker-end="url(#${mid})"/>`+r.l.map(t=>`<text class="lb" x="${t[0]}" y="${t[1]}" text-anchor="${t[3]||'middle'}">${esc(t[2])}</text>`).join('')).join('');
+  const s=states.map(t=>`<rect class="st" x="${t.x}" y="${t.y}" width="${t.w}" height="${t.h}" rx="10"/><text class="sn" x="${t.x+t.w/2}" y="${t.y+t.h/2+(t.v?-3:5)}" text-anchor="middle">${esc(t.n)}</text>`+(t.v?`<text class="lb" x="${t.x+t.w/2}" y="${t.y+t.h/2+13}" text-anchor="middle">${esc(t.v)}</text>`:'')).join('');
+  return `<svg class="fsm" viewBox="0 0 ${w} ${h}" role="img">${defs}${a}${s}</svg>`;
+}
+const FSM_PISCINA=fsm(820,350,[
+  {n:'NoCarrera',v:'EST_CARRERA = 0',x:320,y:20,w:180,h:58},
+  {n:'Preparados',v:'EST_CARRERA = 1',x:40,y:230,w:180,h:58},
+  {n:'Carrera',v:'EST_CARRERA = 2',x:600,y:230,w:180,h:58}],[
+  {d:'M320 50 C210 60 130 130 110 230',l:[[165,92,'INT1 (S) · INT_SAL','end'],[165,108,'EST_CARRERA = 1, máscara 0','end']]},
+  {d:'M180 230 C205 170 280 120 350 78',l:[[285,165,'INT1 con SAL_FALS ≠ 0','start'],[285,181,'EST_CARRERA = 0, máscara 3','start']]},
+  {d:'M220 262 L600 262',l:[[410,252,'INT1 con SAL_FALS = 0 · EST_CARRERA = 2']]},
+  {d:'M690 230 C670 150 590 90 500 58',l:[[645,92,'FIN_CARRERA = 1 (INT_TEMP),','start'],[645,108,'INICIO_SW: EST_CARRERA = 0','start']]},
+  {d:'M80 288 C60 330 200 330 180 288',l:[[130,345,'INT2 · INT_TEMP: SAL_FALS |= PDATA']]},
+  {d:'M640 288 C620 330 760 330 740 288',l:[[690,345,'INT2 · INT_TEMP: T_CARRERA++']]}]);
+const FSM_RIEGO=fsm(760,300,[
+  {n:'Normal',v:'Seco = 0',x:40,y:120,w:150,h:58},
+  {n:'Seco',v:'Seco = 1, válvula activa',x:300,y:120,w:170,h:58},
+  {n:'Alarma',v:'Alarma_grave = 1',x:580,y:120,w:150,h:58}],[
+  {d:'M190 135 L300 135',l:[[245,104,'TMR0 · CAP_ENTRADA'],[245,120,'Seco = 1']]},
+  {d:'M300 165 L190 165',l:[[245,186,'TMR0 · CAP_ENTRADA'],[245,202,'Seco = 0']]},
+  {d:'M470 150 L580 150',l:[[525,120,'TMR2 · Retardo = 0'],[525,138,'Alarma_grave = 1']]},
+  {d:'M655 178 C640 275 150 285 115 178',l:[[385,290,'Sin interrupción: OPERADOR lee PA6 (sondeo) · Alarma_grave = 0, Seco = 0']]},
+  {d:'M85 120 C70 60 150 60 135 120',l:[[40,40,'TMR2 · Retardo = 0: Datos_nuevos = 1','start']]}]);
+const FSM_ROBOT=fsm(760,300,[
+  {n:'Espera',v:'MODO = 0',x:20,y:120,w:130,h:58},
+  {n:'Navega',v:'MODO = 1',x:300,y:120,w:130,h:58},
+  {n:'Gira',v:'TIEMPO_OPERAC ≠ 0',x:540,y:30,w:170,h:58},
+  {n:'Alarma',v:'BRA ALARMA',x:540,y:210,w:170,h:58}],[
+  {d:'M150 150 L300 150',l:[[225,124,'PA0: sondeo'],[225,140,'NAVEGA: MODO = 1']]},
+  {d:'M430 135 C470 90 500 70 540 60',l:[[430,70,'INT1-3 · RUT_INT']]},
+  {d:'M540 80 C510 110 470 135 430 150',l:[[520,128,'TMR1: TIEMPO_OPERAC = 0','start']]},
+  {d:'M430 165 C470 200 500 225 540 240',l:[[420,240,'INT5 · RUT_INT5'],[420,256,'los 4 sensores activos']]}]);
+
+// ---------- ejercicios ----------
+const SRC_POOL=['INT1','INT2','INT3','INT4','INT5','INT6','TMR0','TMR1','TMR2','TMR3','UART1','UART2'];
+const fix=o=>()=>o;
+const TABS=[];
+
+// ===== INTERRUPCIONES =====
+TABS.push({id:'int',t:'Interrupciones',s:'PIVR, niveles, ICR, pila',intro:`<span class="eyebrow">Regla de oro</span><h2>Dirección del vector = VBR + (PIVR + offset) × 4</h2>
+ <p>El nivel va de 1 a 7 (0 inhabilita). Una interrupción de nivel N se acepta si N &gt; máscara del SR, salvo el nivel 7, que se acepta siempre. Con la misma prioridad manda el orden de las fuentes, de INT1 a SWTO.</p>
+ <p class="muted">PIVR solo programa los bits 7-5, y el primer vector de usuario es el 64. Por eso puede valer $40, $60, $80, $A0, $C0 o $E0.</p>`,ex:[
+ {title:'Dirección del vector o valor de PIVR',random:1,gen(){ const s=pick(SRC_POOL), pivr=pick([0x40,0x60,0x80,0xA0,0xC0,0xE0]), addr=vectorAddr(pivr,s);
+   if(Math.random()<.5) return {q:`Con <code>PIVR = $${hex(pivr,2)}</code> y VBR = 0, ¿en qué dirección debe estar el vector de <strong>${s}</strong>?`,
+     f:[{k:'o',l:'Offset de la fuente',t:'int',a:OFF[s]},{k:'n',l:'Nº de vector',t:'int',a:pivr+OFF[s]},{k:'d',l:'Dirección ($)',t:'hex',a:hex(addr,3)}],
+     sol:`<p>(${pivr} + ${OFF[s]}) × 4 = ${addr} = <strong>$${hex(addr,3)}</strong>.</p>`};
+   return {q:`El vector de <strong>${s}</strong> está en <code>ORG $${hex(addr,3)}</code> y VBR = 0. ¿Cuánto vale PIVR?`,
+     f:[{k:'p',l:'PIVR ($)',t:'hex',a:hex(pivr,2)}],sol:`<p>$${hex(addr,3)} / 4 = ${addr/4}; ${addr/4} − ${OFF[s]} = ${pivr} = <strong>$${hex(pivr,2)}</strong>.</p>`}; }},
+ {title:'¿Cuánto puede valer PIVR?',tag:'Criterio',gen:fix({q:'Indica si cada valor es válido para PIVR en un sistema normal, teniendo en cuenta que los vectores 0-63 están reservados.',
+   f:[['p1','$40','si'],['p2','$48','no'],['p3','$20','no'],['p4','$60','si'],['p5','$C0','si'],['p6','$85','no']].map(x=>({k:x[0],l:x[1],t:'sel',o:SINO,a:x[2]})),
+   sol:`<p>Solo cuentan los bits 7-5, así que debe ser múltiplo de 32. $48 y $85 no lo son. $20 lo es, pero sus vectores (32 a 63 con las fuentes) pisan los predefinidos.</p>`})},
+ {title:'Configurar ICRx',random:1,gen(){ const n=rnd(1,3); const reg=pick([1,1,2,4]); const srcs=ICR[reg].slice(0,reg===2?2:reg===4?3:8); const m={}; while(Object.keys(m).length<Math.min(n,srcs.length)) m[pick(srcs)]=rnd(1,7);
+   const v=icrValue(m); return {q:`Configura ${Object.keys(m).map(s=>`<strong>${s}</strong> con nivel ${m[s]}`).join(', ')}, sin más fuentes activas.`,
+     f:[{k:'r',l:'Registro',t:'sel',o:[['1','ICR1'],['2','ICR2'],['3','ICR3'],['4','ICR4']],a:String(reg)},{k:'v',l:'Valor ($)',t:'hex',a:hex(v,8),w:1}],
+     sol:`<p>Cada fuente ocupa 4 bits: PI = 1 más el nivel. ${Object.keys(m).map(s=>`${s}: 1 + ${bin(m[s],3)} = $${(8|m[s]).toString(16).toUpperCase()}`).join(' · ')}. Resultado: <strong>ICR${reg} = $${hex(v,8)}</strong>.</p>`}; }},
+ {title:'Niveles a partir de ICR',random:1,gen(){ const m={INT1:rnd(1,7),INT2:rnd(1,7),INT3:rnd(1,7),INT4:rnd(1,7)}; const v=icrValue(m);
+   return {q:`<code>MOVE.L #$${hex(v,8)},D7</code> y <code>MOVE.L D7,ICR1</code>. Se disparan a la vez INT1 a INT4. ¿En qué orden se atienden?`,
+     f:[1,2,3,4].map(i=>({k:'p'+i,l:`${i}º`,t:'sel',o:['INT1','INT2','INT3','INT4'].map(x=>[x,x]),a:orderFromIcr1(v)[i-1]})),
+     sol:`<p>Niveles: ${Object.keys(m).map(s=>`${s} = ${m[s]}`).join(', ')}. Primero el nivel mayor y, si empatan, la fuente de número menor: <strong>${orderFromIcr1(v).join(', ')}</strong>.</p>`}; }},
+ {title:'¿Se acepta la interrupción?',random:1,gen(){ const M=rnd(0,7), N=rnd(1,7), sr=(0x2000|M<<8); const ok=N>M||N===7;
+   return {q:`<code>SR = $${hex(sr,4)}</code> y llega una interrupción de <strong>nivel ${N}</strong>.`,
+     f:[{k:'m',l:'Máscara I2I1I0',t:'int',a:M},{k:'a',l:'¿Se atiende ahora?',t:'sel',o:SINO,a:ok?'si':'no'},{k:'t',l:'Máscara dentro de la rutina',t:'int',a:ok?N:M}],
+     sol:`<p>Los bits 10-8 del SR dan máscara ${M}. ${N===7?'El nivel 7 se acepta siempre.':N>M?`${N} &gt; ${M}: se acepta.`:`${N} ≤ ${M}: queda pendiente.`} ${ok?`Al entrar, la máscara se copia del nivel: ${N}. Solo la interrumpirá un nivel mayor; RTE recupera la máscara anterior.`:'La máscara no cambia.'}</p>`}; }},
+ {title:'Flancos: PITR',random:1,gen(){ const ints=['INT1','INT2','INT3','INT4','INT5','INT6'], e={}; ints.forEach(i=>e[i]=rnd(0,1)); const v=pitr(e);
+   return {q:`Sensibilidad a flanco: ${ints.map(i=>`${i} ${e[i]?'subida':'bajada'}`).join(', ')}.`,f:[{k:'v',l:'PITR ($)',t:'hex',a:hex(v,8),w:1}],sol:`<p>1 = subida. INT1-INT4 en los bits 31-28, INT5 en el 6 e INT6 en el 5: <strong>$${hex(v,8)}</strong>.</p>`}; }},
+ {title:'A7 tras entrar en la rutina',random:1,gen(){ const a7=(rnd(0x4000,0xFFFFF)*16+rnd(0,15))>>>0; const ops=pick([[['MOVE.L D1,-(A7)',4],['MOVE.B D4,-(A7)',1]],[['ADDA.L #-12,A7',12],['MOVEM.L D5-D7,(A7)',0]],[['MOVE.L D0,-(A7)',4],['MOVE.L A0,-(A7)',4]],[['ADDA.L #-8,A7',8],['MOVEM.L D0/A0,(A7)',0],['MOVE.W D2,-(A7)',2]]]);
+   const tot=ops.reduce((s,o)=>s+o[1],0), r=a7After(a7,tot);
+   return {q:`Con <code>A7 = $${hex(a7,8)}</code> llega una interrupción. ¿Cuánto vale A7 tras estas instrucciones?`,code:ops.map(o=>'        '+o[0]).join('\n'),f:[{k:'a',l:'A7 ($)',t:'hex',a:hex(r,8),w:1}],
+     sol:`<p>La pila se alinea a long: $${hex(a7,8)} → $${hex(a7-a7%4,8)}. La trama ocupa 8 bytes (PC, SR y Vector/Format), y la rutina apila ${tot} más. <strong>A7 = $${hex(r,8)}</strong>. MOVEM con <code>(A7)</code> no mueve A7.</p>`}; }},
+ {title:'A7 en el punto H',tag:'Cuestión U4-1',gen:fix({q:'Con <code>A7 = $00048A5C</code> llega INT2.',code:`ATEN_2  MOVE.L  D1,-(A7)
+        MOVE.B  D4,-(A7)
+        MOVE.L  2(A7),D4   ; Punto H`,f:[{k:'a',l:'A7 en H ($)',t:'hex',a:'00048A4F',w:1}],sol:'<p>$48A5C − 8 − 4 − 1 = <strong>$00048A4F</strong>. Leer con <code>2(A7)</code> no modifica A7.</p>'})},
+ {title:'A7 impar en el punto P',tag:'Cuestión U4-2',gen:fix({q:'Con <code>A7 = $00C89209</code> llega INT4.',code:`INT_4   ADDA.L  #-12,A7
+        MOVEM   D5-D7,(A7)
+        MOVE.L  32(A7),D7  ; Punto P`,f:[{k:'a',l:'A7 en P ($)',t:'hex',a:'00C891F4',w:1}],sol:'<p>Primero se alinea: $C89209 → $C89208. Después, −8 de la trama y −12: <strong>$00C891F4</strong>.</p>'})},
+ {title:'Periférico en INT3, nivel 4',tag:'Cuestión U4-3',gen:fix({q:'El código hace <code>MOVEQ #$80,D0</code> y <code>MOVE.B D0,PIVR</code>. No hay otras fuentes.',code:`        ORG     $JJJJJJJJ
+        DC.L    RUT3
+        ...
+        MOVE.L  #$TTTTTTTT,D0
+        MOVE.L  D0,ICR1`,f:[{k:'j',l:'$JJJJJJJJ',t:'hex',a:'20C',w:1},{k:'t',l:'$TTTTTTTT',t:'hex',a:'00C00000',w:1}],sol:'<p>($80 + 3) × 4 = <strong>$20C</strong>. INT3 ocupa los bits 23-20: 1 + 100 = $C, luego <strong>$00C00000</strong>.</p>'})},
+ {title:'INT5 nivel 6, INT6 nivel 3',tag:'Cuestión U4-4',gen:fix({q:'Ambas usan la misma rutina y no hay más fuentes.',code:`        ORG     $1E8
+        DC.L    INT_56
+        DC.L    INT_56
+        ...
+        MOVEQ   #$VV,D2
+        MOVE.B  D2,PIVR
+        MOVE.L  #$LLLLLLLL,D2
+        MOVE.L  D2,ICR4`,f:[{k:'v',l:'$VV',t:'hex',a:'60'},{k:'l',l:'$LLLLLLLL',t:'hex',a:'0EB00000',w:1}],sol:'<p>$1E8 / 4 = 122; 122 − 26 = 96 = <strong>$60</strong>. INT5: $E; INT6: $B; QSPI queda a 0: <strong>$0EB00000</strong>.</p>'})},
+ {title:'Orden con $ACCA0000',tag:'Cuestión U4-5',gen:fix({q:'<code>MOVE.L #$ACCA0000,D7</code> y <code>MOVE.L D7,ICR1</code>. Se disparan a la vez INT1 a INT4.',f:[1,2,3,4].map((i,x)=>({k:'p'+i,l:`${i}º`,t:'sel',o:['INT1','INT2','INT3','INT4'].map(y=>[y,y]),a:['INT2','INT3','INT1','INT4'][x]})),sol:'<p>Niveles: INT1 = 2, INT2 = 4, INT3 = 4, INT4 = 2. Orden: <strong>INT2, INT3, INT1, INT4</strong>.</p>'})},
+ {title:'ColdMaze: PIVR, PITR y niveles',tag:'Examen Ene-2016, 2.1',gen:fix({q:'El vector de INT5 está en $168 y hay cuatro sensores en INT1, INT2, INT3 e INT5 que interrumpen con flanco de subida. El programa escribe <code>ICR1 = $BBB00D00</code>, <code>ICR2 = $C0000000</code> e <code>ICR4 = $0E000000</code>.',
+   f:[{k:'p',l:'PIVR ($)',t:'hex',a:'40'},{k:'t',l:'PITR ($)',t:'hex',a:'E0000040',w:1},{k:'n1',l:'Nivel INT1-3',t:'int',a:3},{k:'n2',l:'Nivel TMR1',t:'int',a:5},{k:'n3',l:'Nivel UART1',t:'int',a:4},{k:'n4',l:'Nivel INT5',t:'int',a:6}],
+   sol:'<p>$168 / 4 = 90; 90 − 26 = 64 = <strong>$40</strong>. PITR: bits 31, 30, 29 y 6 = <strong>$E0000040</strong>. Niveles: $B → 3, $D en TMR1 → 5, $C en UART1 → 4, $E en INT5 → 6. Por eso el anidamiento máximo es INTx, UART1, TIMER1 e INT5.</p>'})},
+ {title:'Leer ISR',tag:'Examen Ene-2016, 1.3',gen:fix({q:'El contenido de ISR es $80000040. Después, D1 se usa como en el listado: <code>TABLA</code> tiene pares (tiempo, dirección) por combinación de sensores, y la fila 3 es <code>DC.W 60,2</code>.',code:`        MOVE.L  ISR,D0
+        NOT.L   D0
+        AND.L   #$E0000000,D0
+        MOVE.L  #29,D1
+        LSR.L   D1,D0
+        LEA     TABLA,A0
+        MOVE.W  2(A0,D0*4),D1`,f:[{k:'a',l:'D0 tras NOT ($)',t:'hex',a:'7FFFFFBF',w:1},{k:'b',l:'D0 tras AND ($)',t:'hex',a:'60000000',w:1},{k:'c',l:'D0 tras LSR ($)',t:'hex',a:'3'},{k:'d',l:'D1 al final',t:'int',a:2}],
+   sol:'<p>ISR tiene un 0 cuando la línea está a nivel alto, de ahí el NOT. Con AND quedan INT1 a INT3, LSR los baja a los bits 2-0 (D0 = 3) y <code>2(A0,D0*4)</code> lee el segundo dato de esa fila: <strong>D1 = 2</strong>.</p>'})},
+]});
+
+// ===== TIEMPOS =====
+TABS.push({id:'tmr',t:'Tiempos y TMR',s:'Frecuencia → tiempo, PS, TRR',intro:`<span class="eyebrow">Fórmulas</span><h2>T = TRR × (PS + 1) × D / f<sub>CLK</sub></h2>
+ <p>D es 16 si CLK = 10 y 1 si CLK = 01. Onda cuadrada: f = f<sub>CONT</sub> / (2 × TRR), con OM = 1. PWM: f<sub>PWM</sub> = f<sub>CLK</sub> / (256 × 2<sup>CKSL</sup>).</p>
+ <p class="muted">Periódica: FRR = 1, ORI = 1. Una sola vez: FRR = 0, ORI = 1. RST = 1 arranca ya; RST = 0 lo deja para después.</p>`,ex:[
+ {title:'Calcular PS y TMR',random:1,gen(){ let f,K,trr,clk,t; do{ f=pick([12,20,25,48,50,64,66])*1e6; clk=pick([1,2]); K=pick([8,10,16,20,25,32,40,50,64,80,100,125,128,160,200,250,256]); trr=pick([1000,2000,2500,4000,5000,8000,10000,11000,12500,20000,25000,50000]); t=tIrq(f,K-1,clk,trr)*1000; }while(Math.abs(t*1000-Math.round(t*1000))>1e-6);
+   const mode=pick(['per','una']), n=rnd(0,3), rst=pick([0,1]), v=tmr({ps:K-1,ori:1,frr:mode==='per'?1:0,clk,rst});
+   return {q:`MCF5272 a <strong>${f/1e6} MHz</strong>, <code>TRR${n} = $${hex(trr,4)}</code> (${trr}). TIMER${n} debe generar una interrupción ${mode==='per'?'<strong>periódica</strong> cada':'<strong>una sola vez</strong> a los'} <strong>${fnum(t)} ms</strong>, con ${clk===2?'el reloj del sistema / 16':'el reloj del sistema'}, ${rst?'arrancando ahora mismo':'habilitándose más adelante en el programa'}.`,
+     f:[{k:'p',l:'PS ($)',t:'hex',a:hex(K-1,2)},{k:'c',l:'CLK',t:'bin',a:bin(clk,2)},{k:'fr',l:'FRR',t:'bin',a:mode==='per'?'1':'0'},{k:'o',l:'ORI',t:'bin',a:'1'},{k:'r',l:'RST',t:'bin',a:String(rst)},{k:'v',l:`TMR${n} ($)`,t:'hex',a:hex(v,4),w:1}],
+     sol:`<p>PS + 1 = T × f / (TRR × D) = ${fnum(t/1000,6)} × ${f} / (${trr} × ${divOf(clk)}) = ${K}, luego PS = $${hex(K-1,2)}. Parte baja: CE = 00, OM = 0, ORI = 1, FRR = ${mode==='per'?1:0}, CLK = ${bin(clk,2)}, RST = ${rst}. <strong>TMR${n} = $${hex(v,4)}</strong>.</p>`}; }},
+ {title:'Calcular el tiempo a partir de TMR y TRR',random:1,gen(){ const f=pick([12,20,25,48,50,64,66])*1e6, sq=Math.random()<.4, n=sq?rnd(0,1):rnd(0,3), K=pick([10,20,25,32,50,64,80,100,128,200,256]), clk=pick([1,2]), trr=rnd(100,60000), v=tmr({ps:K-1,om:sq?1:0,ori:sq?0:1,frr:1,clk,rst:1});
+   const T=tIrq(f,K-1,clk,trr)*(sq?2:1)*1000; const hz=1000/T;
+   return {q:`MCF5272 a <strong>${f/1e6} MHz</strong>, <code>TMR${n} = $${hex(v,4)}</code> y <code>TRR${n} = $${hex(trr,4)}</code>. ${sq?`Se genera una onda cuadrada en TOUT${n}.`:'Se generan interrupciones periódicas.'}`,
+     f:[{k:'ps',l:'PS + 1',t:'int',a:K},{k:'d',l:'Divisor de reloj',t:'int',a:divOf(clk)},{k:'t',l:`Periodo (ms)`,t:'num',a:T,tol:.01*T},{k:'hz',l:'Frecuencia (Hz)',t:'num',a:hz,tol:.01*hz}],
+     sol:`<p>PS + 1 = ${K}, D = ${divOf(clk)}, TRR = ${trr}. ${sq?'Con conmutación, un periodo son 2 × TRR cuentas. ':''}T = ${sq?'2 × ':''}${trr} × ${K} × ${divOf(clk)} / ${f} = <strong>${fnum(T,4)} ms</strong>, o sea ${fnum(hz,2)} Hz.</p>`}; }},
+ {title:'Calcular TRR',random:1,gen(){ let f,K,clk,trr,t,sq; do{ f=pick([20,25,48,50,64])*1e6; K=pick([10,20,25,50,64,100,125,200,250]); clk=pick([1,2]); trr=rnd(10,500)*50; sq=Math.random()<.35; t=trr*K*divOf(clk)/f*(sq?2:1); }while(trr>65535||Math.abs(t*1e6-Math.round(t*1e6))>1e-6);
+   const fr=1/t;
+   return {q:`Reloj de <strong>${f/1e6} MHz</strong>, PS + 1 = ${K}, ${clk===2?'reloj / 16':'reloj del sistema'}. ${sq?`Queremos una onda cuadrada de periodo <strong>${fnum(t*1000)} ms</strong>.`:`Queremos interrupciones cada <strong>${fnum(t*1000)} ms</strong>.`}`,
+     f:[{k:'fc',l:'f_CONT (Hz)',t:'num',a:f/divOf(clk)/K,tol:1},{k:'d',l:'TRR (decimal)',t:'int',a:trr},{k:'h',l:'TRR ($)',t:'hex',a:hex(trr,4)}],
+     sol:`<p>f<sub>CONT</sub> = ${f} / ${divOf(clk)} / ${K} = ${fnum(f/divOf(clk)/K,2)} Hz. TRR = ${sq?'T × f<sub>CONT</sub> / 2':'T × f<sub>CONT</sub>'} = <strong>${trr} = $${hex(trr,4)}</strong>.</p>`}; }},
+ {title:'Tareas largas: contar interrupciones',random:1,gen(){ const per=pick([5,10,20,25,50,100,125,200,250,500]), tot=pick([1,2,3,5,10,30])*60, n=tot*1000/per, step=pick([1,2,3,4]); const init=n*step;
+   if(Math.random()<.5) return {q:`Un timer interrumpe cada <strong>${per} ms</strong>. Un contador se carga con KKKK y se decrementa de ${step} en ${step} en cada interrupción. La tarea debe ejecutarse cada <strong>${tot/60} min</strong>.`,f:[{k:'k',l:'KKKK',t:'int',a:init}],sol:`<p>${tot} s / ${per} ms = ${n} interrupciones. Con paso ${step}: <strong>KKKK = ${init}</strong>.</p>`};
+   return {q:`<code>valor = ${init}</code> y la rutina hace <code>valor -= ${step}</code>; al llegar a 0 llama a la tarea y recarga. La tarea debe ejecutarse cada <strong>${tot/60} min</strong>.`,f:[{k:'n',l:'Interrupciones por ciclo',t:'int',a:n},{k:'t',l:'Periodo (ms)',t:'num',a:per,tol:.01}],sol:`<p>${init} / ${step} = ${n} interrupciones. ${tot*1000} ms / ${n} = <strong>${per} ms</strong>.</p>`}; }},
+ {title:'PWM: PWCR y anchura',random:1,gen(){ const f=pick([48,50,55,64,66])*1e6, t=pick([5,8,10,20,25,40])*1e3, above=Math.random()<.5, c=above?ckslAbove(f,t):ckslClosest(f,t), en=pick([0,1]), lvl=pick([0,1]), v=pwcr({en,lvl,cksl:c}), vm=pick([20,30,40,50]), vv=rnd(2,vm-1), w=Math.round(256*vv/vm);
+   return {q:`MCF5272 a <strong>${f/1e6} MHz</strong>. Queremos una señal PWM ${above?`con frecuencia <strong>mayor que ${t/1e3} KHz</strong> y lo más próxima posible`:`lo más próxima posible a <strong>${t/1e3} KHz</strong>`}, ${en?'habilitada ya':'habilitada más adelante'} y con nivel ${lvl?'alto':'bajo'} cuando el modulador está inhabilitado. El motor es lineal, con ${vm} cm/s al máximo, y queremos ${vv} cm/s.`,
+     f:[{k:'c',l:'CKSL',t:'int',a:c},{k:'v',l:'PWCR ($)',t:'hex',a:hex(v,2)},{k:'w',l:'PWWD ($)',t:'hex',a:hex(w>255?255:w,2)}],
+     sol:`<p>f<sub>CLK</sub> / (256 × f) = ${fnum(f/(256*t),2)}. Con CKSL = ${c}, f<sub>PWM</sub> = ${fnum(fPwm(f,c)/1000,2)} KHz. EN = ${en}, FRC1 = 0, LVL = ${lvl}: <strong>PWCR = $${hex(v,2)}</strong>. Anchura: 256 × ${vv} / ${vm} ≈ ${w > 255 ? 255 : w} = <strong>$${hex(w>255?255:w,2)}</strong>.</p>`}; }},
+ {title:'Interrupción a 352 ms',tag:'Cuestión U6-1',gen:fix({q:'<code>TRR2 = $2AF8</code>, reloj de 64 MHz. TIMER2 debe interrumpir 352 ms después de habilitarse en un punto del programa, con reloj / 16.',f:[{k:'p',l:'PS ($)',t:'hex',a:'7F'},{k:'v',l:'TMR2 ($)',t:'hex',a:'7F14',w:1}],sol:'<p>PS + 1 = 0,352 × 64·10⁶ / (11000 × 16) = 128. Parte baja: ORI = 1, CLK = 10, FRR = 0 y RST = 0: <strong>$7F14</strong>.</p>'})},
+ {title:'Captura de flanco de bajada',tag:'Cuestión U6-2',gen:fix({q:'MCF5272 a 12 MHz. TIMER3 interrumpe al capturar un flanco de bajada en TIN3 desde su configuración, con reloj / 16 y un periodo de contador de 64 µs.',f:[{k:'v',l:'TMR3 ($)',t:'hex',a:'2F85',w:1}],sol:'<p>PS + 1 = 64·10⁻⁶ × 12·10⁶ / 16 = 48, luego PS = $2F. CE = 10, CLK = 10, RST = 1: <strong>$2F85</strong>.</p>'})},
+ {title:'Periodo en TOUT0',tag:'Cuestión U6-3',gen:fix({q:'MCF5272 a 20 MHz, <code>TRR0 = $0CB2</code> y <code>TMR0 = $4F2D</code>.',f:[{k:'t',l:'Periodo (ms)',t:'num',a:416,tol:1}],sol:'<p>PS + 1 = 80, D = 16, OM = 1. T = 2 × 3250 × 80 × 16 / 20·10⁶ = <strong>416 ms</strong>.</p>'})},
+ {title:'Tarea cada 3 minutos',tag:'Cuestión U6-4',gen:fix({q:'TIMER3 interrumpe cada 360 ms. La rutina resta 3 a CONTADOR; al llegar a 0 lo recarga con KKKK y se llama a TAREA, que debe ejecutarse cada 3 minutos.',f:[{k:'k',l:'KKKK',t:'int',a:1500}],sol:'<p>180 s / 0,36 s = 500 interrupciones; 500 × 3 = <strong>1500</strong>.</p>'})},
+ {title:'Ejecutar() cada 5 minutos',tag:'Cuestión U6-5',gen:fix({q:'Calcula el periodo entre interrupciones para que Ejecutar() se llame cada 5 minutos.',code:`uint32_t valor = 4800;
+
+void IntTimer1(void) {
+    /* Se pone a 0 el bit REF de TER1 */
+    valor -= 2;
+    if (valor <= 0) { espera = 0; valor = 4800; }
+}`,f:[{k:'t',l:'Periodo (ms)',t:'num',a:125,tol:.01}],sol:'<p>4800 / 2 = 2400 interrupciones. 300 s / 2400 = <strong>125 ms</strong>.</p>'})},
+ {title:'PWM de 8 KHz',tag:'Cuestión U6-6',gen:fix({q:'MCF5272 a 55 MHz. PWM2 debe dar una frecuencia lo más próxima posible a 8 KHz, a partir de un momento posterior del programa y con nivel alto con el modulador inhabilitado.',f:[{k:'v',l:'PWCR2 ($)',t:'hex',a:'25'}],sol:'<p>55·10⁶ / (256 × 8000) = 26,86, y la potencia más próxima es 32, CKSL = 5. EN = 0, LVL = 1: <strong>$25</strong>.</p>'})},
+ {title:'ColdMaze: VVVV',tag:'Examen Ene-2016, 3.1',gen:fix({q:'MCF5272 a 50 MHz, <code>TRR1 = $1F40</code>. El retardo de 0,1 s carga <code>TIEMPO_RETARDO = 4</code>, que baja 1 en cada interrupción periódica. Usa el reloj del sistema y arranca al configurar.',f:[{k:'t',l:'T entre interrupciones (ms)',t:'num',a:25,tol:.01},{k:'p',l:'PS ($)',t:'hex',a:'9B'},{k:'v',l:'TMR1 ($)',t:'hex',a:'9B1B',w:1}],sol:'<p>T = 0,1 / 4 = 25 ms, f = 40 Hz. PS = 50·10⁶ / (40 × 8000) − 1 = 155 = $9B. ORI = 1, FRR = 1, CLK = 01, RST = 1: <strong>$9B1B</strong>.</p>'})},
+ {title:'ColdMaze: PWM de los motores',tag:'Examen Ene-2016, 3.2',gen:fix({q:'MCF5272 a 50 MHz. Portadora mayor que 20 KHz. Motores lineales con 30 cm/s de máximo; queremos 5 cm/s. Modulador habilitado y nivel irrelevante (usa 0).',f:[{k:'x',l:'PWWD: XX ($)',t:'hex',a:'2B'},{k:'w',l:'PWCR: WW ($)',t:'hex',a:'83'}],sol:'<p>256 × 5 / 30 = 42,67 ≈ 43 = <strong>$2B</strong>. 50·10⁶ / (256 × 20000) = 9,76: la potencia que deja f &gt; 20 KHz es 8, CKSL = 3. EN = 1: <strong>$83</strong>.</p>'})},
+ {title:'Riego: KKKK de los 30 minutos',tag:'Problema U6-1 (sin solucionario)',gen:fix({q:'MCF5272 a 66 MHz, <code>TMR2 = $311D</code>. <code>CONSULTA = 18000</code> interrupciones deben sumar 30 minutos. Si <code>SIGUE_SECO = 6000</code>, ¿cuánto tarda la alarma grave?',f:[{k:'t',l:'T entre interrupciones (ms)',t:'num',a:100,tol:.01},{k:'k',l:'TRR2 = KKKK ($)',t:'hex',a:'203A'},{k:'a',l:'Alarma tras (min)',t:'num',a:10,tol:.01}],sol:'<p>1800 s / 18000 = 100 ms. PS + 1 = 50, D = 16: f<sub>CONT</sub> = 82500 Hz, TRR = 8250 = <strong>$203A</strong>. 6000 × 100 ms = <strong>10 min</strong>.</p>'})},
+ {title:'Riego: niveles y vectores',tag:'Problema U6-1 (sin solucionario)',gen:fix({q:'<code>PIVR = $60</code>. CAP_ENTRADA usa TMR0 con nivel 5, TIMER usa TMR2 con nivel 4 y TIMEOUT usa TMR1 con nivel 2.',f:[{k:'x',l:'Vector CAP_ENTRADA ($)',t:'hex',a:'194'},{k:'y',l:'Vector TIMER ($)',t:'hex',a:'19C'},{k:'z',l:'Vector TIMEOUT ($)',t:'hex',a:'198'},{k:'l',l:'ICR1 ($)',t:'hex',a:'0000DAC0',w:1}],sol:'<p>Vectores: (96 + 5) × 4 = $194; (96 + 7) × 4 = $19C; (96 + 6) × 4 = $198. ICR1: TMR0 = $D, TMR1 = $A, TMR2 = $C: <strong>$0000DAC0</strong>.</p>'})},
+]});
+
+// ===== UART =====
+const XSEL=[['0','0'],['1','1']];
+TABS.push({id:'uart',t:'UART y XCR1',s:'Configurar, tramas, velocidad',intro:`<span class="eyebrow">Trama</span><h2>Bits = arranque + datos + paridad + parada + guarda</h2>
+ <p>Máximo de datos por segundo = velocidad / bits. Tiempo de envío = bits / velocidad.</p>
+ <p class="muted">El orden de bits sigue el solucionario de las cuestiones de clase: arranque 0, datos del bit más significativo al menos significativo, paridad y parada(s) a 0. Una UART real suele enviar primero el bit menos significativo, con parada a 1; confírmalo con tu profesor si te lo preguntan.</p>`,ex:[
+ {title:'Configurar XCR1',random:1,gen(){ const o={br:rnd(0,3),dt:rnd(0,1),st:rnd(0,1),pr:rnd(0,1),tx:rnd(0,1),rx:rnd(0,1)}, v=xcr(o), n=pick([1,2]);
+   return {q:`UART${n}: <strong>${BAUD[o.br]} baudios</strong>, ${o.dt?8:7} bits de datos, ${o.st?2:1} bit(s) de parada, paridad ${o.pr?'impar':'par'}, interrupción de Tx ${o.tx?'habilitada':'inhabilitada'} e interrupción de Rx ${o.rx?'habilitada':'inhabilitada'}.`,
+     f:[{k:'b',l:'BR',t:'bin',a:bin(o.br,2)},{k:'v',l:`XCR${n} ($)`,t:'hex',a:hex(v,2)}],sol:`<p>0 ${bin(o.br,2)} ${o.dt} ${o.st} ${o.pr} ${o.tx} ${o.rx} = <strong>$${hex(v,2)}</strong>.</p>`}; }},
+ {title:'Leer XCR1',random:1,gen(){ const o={br:rnd(0,3),dt:rnd(0,1),st:rnd(0,1),pr:rnd(0,1),tx:rnd(0,1),rx:rnd(0,1)}, v=xcr(o);
+   return {q:`<code>XCR1 = $${hex(v,2)}</code>. Interpreta la configuración.`,f:[{k:'b',l:'Baudios',t:'int',a:BAUD[o.br]},{k:'d',l:'Bits de datos',t:'int',a:o.dt?8:7},{k:'s',l:'Bits de parada',t:'int',a:o.st?2:1},{k:'p',l:'Paridad',t:'sel',o:[['par','Par'],['impar','Impar']],a:o.pr?'impar':'par'},{k:'t',l:'Int. Tx',t:'sel',o:SINO,a:o.tx?'si':'no'},{k:'r',l:'Int. Rx',t:'sel',o:SINO,a:o.rx?'si':'no'}],
+     sol:`<p>$${hex(v,2)} = ${bin(v,8)}: BR = ${bin(o.br,2)}, DT = ${o.dt}, ST = ${o.st}, PR = ${o.pr}, TX = ${o.tx}, RX = ${o.rx}.</p>`}; }},
+ {title:'Secuencia de bits de un dato',random:1,gen(){ const o={br:rnd(0,3),dt:rnd(0,1),st:rnd(0,1),pr:rnd(0,1),tx:0,rx:0}, val=rnd(1,o.dt?255:127), s=frameBits(val,o), t=s.length/BAUD[o.br]*1e6;
+   return {q:`<code>XCR1 = $${hex(xcr(o),2)}</code>. Se envía el dato con valor decimal <strong>${val}</strong>.`,f:[{k:'s',l:'Secuencia de bits',t:'seq',a:s,w:1},{k:'t',l:'Tiempo de envío (µs)',t:'num',a:t,tol:.01*t}],
+     sol:`<p>Arranque 0, dato ${bin(val,o.dt?8:7)}, paridad ${o.pr?'impar':'par'} = ${s[o.dt?9:8]} y ${o.st?'dos paradas':'una parada'}: <strong>${s}</strong>. ${s.length} bits / ${BAUD[o.br]} = ${fnum(t,1)} µs.</p>`}; }},
+ {title:'Máximo de datos por segundo',random:1,gen(){ const o={br:rnd(0,3),dt:rnd(0,1),st:rnd(0,1),pr:0,tx:1,rx:0}, g=rnd(0,4), L=frameLen(o,g), m=Math.floor(BAUD[o.br]/L);
+   return {q:`<code>XCR1 = $${hex(xcr(o),2)}</code> con tiempo de guarda de <strong>${g}</strong> tiempos de bit entre envíos.`,f:[{k:'l',l:'Bits por dato',t:'int',a:L},{k:'m',l:'Datos/s (completos)',t:'int',a:m}],sol:`<p>1 + ${o.dt?8:7} + 1 + ${o.st?2:1} + ${g} = ${L} bits. ${BAUD[o.br]} / ${L} = ${fnum(BAUD[o.br]/L,2)}, luego <strong>${m}</strong>.</p>`}; }},
+ {title:'Velocidad mínima',random:1,gen(){ let o,rate,bytes,need,br; do{ o={dt:rnd(0,1),st:rnd(0,1),pr:rnd(0,1),tx:1,rx:0}; bytes=pick([1,2,4,6,8]); rate=pick([5,10,20,25,40,50,100,200]); need=rate*bytes*frameLen(o); br=BAUD.findIndex(b=>b>=need); }while(br<0); o.br=br;
+   return {q:`Se envían <strong>${bytes} bytes</strong> ${rate} veces por segundo, con ${o.dt?8:7} bits de datos, ${o.st?2:1} de parada y paridad ${o.pr?'impar':'par'}, sin guarda e interrupción de Tx. Elige la velocidad mínima.`,f:[{k:'n',l:'Baudios necesarios',t:'int',a:need},{k:'b',l:'Velocidad elegida',t:'int',a:BAUD[br]},{k:'v',l:'XCR1 ($)',t:'hex',a:hex(xcr(o),2)}],
+     sol:`<p>${rate} × ${bytes} × ${frameLen(o)} = ${need} baudios. La estándar inmediata es <strong>${BAUD[br]}</strong>: <strong>XCR1 = $${hex(xcr(o),2)}</strong>.</p>`}; }},
+ {title:'Dato 106 con XCR1 = $78',tag:'Cuestión U5-3',gen:fix({q:'<code>XCR1 = $78</code>. Determina la secuencia al recibir el dato con valor decimal 106.',f:[{k:'s',l:'Secuencia',t:'seq',a:'001101010000',w:1}],sol:'<p>19200 baudios, 8 datos, 2 paradas y paridad par. Arranque 0, dato 01101010, paridad 0 y paradas 00: <strong>001101010000</strong>.</p>'})},
+ {title:'XCR1 a partir de una trama',tag:'Cuestión U5-4',gen:fix({q:'Se envía la secuencia <code>00011110110</code> en unos 573 µs y genera una interrupción de la UART, tras:',code:`        MOVE.B  #61,D1
+        MOVE.B  D1,XDAT1`,f:[{k:'b',l:'Baudios',t:'int',a:19200},{k:'v',l:'XCR1 ($)',t:'hex',a:'72'}],sol:'<p>11 bits / 573 µs ≈ 19200 baudios. 61 = 00111101 (8 bits), paridad 1 con cinco unos: par. Queda una parada. Interrupción de Tx: 0 11 1 0 0 1 0 = <strong>$72</strong>.</p>'})},
+ {title:'Datos por segundo con $22',tag:'Cuestión U5-5',gen:fix({q:'<code>XCR1 = $22</code> y una guarda de 3 tiempos de bit.',f:[{k:'m',l:'Datos/s',t:'int',a:369}],sol:'<p>4800 baudios, 7 datos, 1 parada: 1 + 7 + 1 + 1 + 3 = 13 bits. 4800 / 13 = 369,2: <strong>369</strong>.</p>'})},
+ {title:'ColdMaze: constante UU',tag:'Examen Ene-2016, 5.1',gen:fix({q:'Hay como mínimo 4 centésimas entre interrupciones de sensores. En cada una se envían 8 bytes: estado de sensores (4) y tiempo (4). Usa paridad impar, 2 de parada, sin guarda, con la velocidad mínima y con interrupción de Tx.',f:[{k:'n',l:'Baudios necesarios',t:'int',a:2400},{k:'b',l:'Velocidad',t:'int',a:4800},{k:'v',l:'UU ($)',t:'hex',a:'3E'}],sol:'<p>25 × 8 = 200 bytes/s; 200 × (8 + 1 + 1 + 2) = 2400 baudios. La mínima válida es 4800. BR = 01, DT = 1, ST = 1, PR = 1, TX = 1, RX = 0: <strong>$3E</strong>.</p>'})},
+ {title:'Banderas de XSR',tag:'Criterio',gen:fix({q:'Empareja cada acción con el bit de XSR1 que usa.',f:[{k:'a',l:'Comprobar que se puede enviar',t:'int',a:5},{k:'b',l:'Comprobar dato recibido',t:'int',a:0},{k:'c',l:'Borrar "dato transmitido" (BSET)',t:'int',a:1}],sol:'<p>TE es el bit 5, RX el 0 y TX el 1. Los indicadores se ponen a 0 escribiendo un 1.</p>'})},
+]});
+
+// ===== ESTADOS =====
+const SEL_ST=a=>a.map(x=>[x,x]);
+const P_ST=['NoCarrera','Preparados','Carrera'], P_RUT=['INT_SAL (INT1)','INT_TEMP (INT2)','Programa principal (sin interrupción)'], P_VAR=['EST_CARRERA = 1','EST_CARRERA = 2','EST_CARRERA = 0','SAL_FALS |= PDATA','T_CARRERA + 1','FIN_CARRERA = 1'];
+const rows=(pre,list,stO,rutO,varO,cases)=>list.flatMap((r,i)=>[{k:pre+i+'s',l:'Estado siguiente',t:'sel',o:SEL_ST(stO),a:r[0],head:`${i+1}. ${cases[i]}`},{k:pre+i+'r',l:'Rutina',t:'sel',o:SEL_ST(rutO),a:r[1]},{k:pre+i+'v',l:'Variable clave',t:'sel',o:SEL_ST(varO),a:r[2]}]);
+TABS.push({id:'fsm',t:'Diagramas de estados',s:'Saltos, interrupciones, variables',intro:`<span class="eyebrow">Método</span><h2>Busca la variable de estado y quién la escribe</h2>
+ <p>Para cada cambio pregúntate: qué rutina escribe la variable, qué interrupción lanza esa rutina y qué condición comprueba antes. Si una rutina no cambia la variable, es un bucle sobre el mismo estado.</p>
+ <p class="muted">Los problemas U4-1 y U6-1 no traen solucionario en tu carpeta: estas soluciones están deducidas del listado. La tercera parte del robot sí se apoya en la solución de enero de 2016.</p>`,ex:[
+ {title:'Piscina: diagrama de estados',tag:'Problema U4-1, 4.1',gen:fix({q:`Sistema de cronometraje con <code>EST_CARRERA</code>: 0 = NoCarrera, 1 = Preparados, 2 = Carrera. INT1 (señal S, nivel 5) lanza INT_SAL; la interrupción periódica INT2 (1 ms, nivel 2) lanza INT_TEMP.`,code:`INT_SAL  tst.b   EST_CARRERA
+         bne     E_PREPARADOS
+         ...                      * Luz verde, máscara a 0 en la pila
+         move.b  #1,EST_CARRERA   * Lee PV: ESTILO y N_VUELTAS
+         bra     SALIR
+E_PREPARADOS
+         tst.b   SAL_FALS
+         bne     FALLO
+         move.b  #2,EST_CARRERA
+         bra     SALIR
+FALLO    ...                      * Luz roja, DISP_FALLO
+         move.b  #0,EST_CARRERA
+         clr.b   SAL_FALS         * Máscara a 3 en la pila
+SALIR    ...  rte
+
+INT_TEMP cmp     #1,EST_CARRERA
+         bne     E_CARRERA
+         ...                      * SAL_FALS |= PDATA
+         bra     FIN_TEMP
+E_CARRERA ...                     * T_CARRERA++, N_CALLE, FIN_CALLES
+         cmpi    #8,FIN_CALLES
+         bne     FIN_TEMP
+         move.b  #1,FIN_CARRERA   * Máscara a 3 en la pila
+FIN_TEMP ...  rte
+
+PPAL     tst.b   FIN_CARRERA      * Bucle del principal
+         beq     PPAL
+         bsr     DISP_TIEMP
+         bra     INICIO           * INICIO_SW: clr.b EST_CARRERA`,
+   f:rows('p',[['Preparados','INT_SAL (INT1)','EST_CARRERA = 1'],['Preparados','INT_TEMP (INT2)','SAL_FALS |= PDATA'],['Carrera','INT_SAL (INT1)','EST_CARRERA = 2'],['NoCarrera','INT_SAL (INT1)','EST_CARRERA = 0'],['Carrera','INT_TEMP (INT2)','T_CARRERA + 1'],['NoCarrera','Programa principal (sin interrupción)','EST_CARRERA = 0']],P_ST,P_RUT,P_VAR,['En NoCarrera, el juez pulsa (S).','En Preparados, llega el pulso periódico.','En Preparados, el juez pulsa y <code>SAL_FALS = 0</code>.','En Preparados, el juez pulsa y <code>SAL_FALS ≠ 0</code>.','En Carrera, llega el pulso periódico y aún no han terminado todas las calles.','En Carrera, tras el último pulso <code>FIN_CARRERA = 1</code> y el principal lo detecta.']),
+   sol:FSM_PISCINA+`<p>INT_SAL distingue por <code>EST_CARRERA</code> y por <code>SAL_FALS</code>. <code>INICIO_SW</code> devuelve a NoCarrera tras <code>DISP_TIEMP</code>.</p>`})},
+ {title:'Piscina: máscaras y configuración',tag:'Problema U4-1, 2 y 3',gen:fix({q:'<code>PIVR = $40</code>. S va por INT1 con nivel 5 y la periódica por INT2 con nivel 2. <code>INICIO_INT</code> parte de <code>SR = $2700</code> y hace <code>ANDI #$FBFF</code>.',f:[{k:'j',l:'Vector INT_TEMP ($)',t:'hex',a:'108'},{k:'k',l:'Vector INT_SAL ($)',t:'hex',a:'104'},{k:'l',l:'ICR1 ($)',t:'hex',a:'DA000000',w:1},{k:'m',l:'Máscara resultante',t:'int',a:3},{k:'e',l:'¿Entra INT_TEMP en NoCarrera?',t:'sel',o:SINO,a:'no'}],sol:'<p>Vectores: (64 + 2) × 4 = $108 y (64 + 1) × 4 = $104. ICR1: $D y $A. $2700 AND $FBFF = $2300: máscara 3. El nivel 2 no pasa la máscara, así que INT_TEMP no entra en NoCarrera; sí el nivel 5.</p>'})},
+ {title:'Piscina: casos límite',tag:'Problema U4-1, 4.3 y 4.4',gen:fix({q:'<code>T_CARRERA</code> es un <code>uint32_t</code> que cuenta milisegundos. Hay 8 calles.',f:[{k:'t',l:'Tiempo máximo (días)',t:'num',a:49.7,tol:.1},{k:'a',l:'Si un nadador abandona, ¿llega FIN_CARRERA a 1?',t:'sel',o:SINO,a:'no'}],sol:'<p>2³² ms ≈ 4,29·10⁹ ms ≈ <strong>49,7 días</strong>. Si un nadador abandona, FIN_CALLES nunca llega a 8 y el sistema se queda en Carrera indefinidamente.</p>'})},
+ {title:'Riego: diagrama de estados',tag:'Problema U6-1',gen:fix({q:'El detector de sequedad entra por TIN0 (TMR0 con captura en ambos flancos). TIMER es la interrupción periódica de TMR2.',code:`CAP_ENTRADA  ...                 * Borra CAP en TER0
+             TST.B  Seco
+             BEQ    ACTIVA_VALV
+             CLR.B  Seco
+             BCLR   #5,PBDAT_L(A0)  * Cierra válvula de emergencia
+             BRA    SALIR3
+ACTIVA_VALV  BSET   #5,PBDAT_L(A0)
+             MOVE.B #1,Seco
+             MOVE.L #SIGUE_SECO,Retardo
+SALIR3       ...  RTE
+
+TIMER        ...                 * Borra REF en TER2; Retardo--
+             BNE    SALIR
+             TST.B  Seco
+             BNE    ALAR_GRAVE
+             MOVE.L #CONSULTA,Retardo
+             MOVE.B #1,Datos_nuevos
+             BRA    SALIR
+ALAR_GRAVE   MOVE.B #1,Alarma_grave
+             BSET.B #6,PBDAT_L(A0)   * Activa alarma
+             BCLR.B #4,TMR2_L(A0)    * ORI = 0
+             BCLR.B #4,TMR1_L(A0)
+SALIR        ...  RTE
+
+OPERADOR     BTST.B #6,PADAT_L(A0)   * Principal: espera reinicio
+             BEQ    OPERADOR
+             CLR.B  Alarma_grave
+             CLR.B  Seco
+             ...                 * Rehabilita timers`,
+   f:rows('r',[['Seco','CAP_ENTRADA (TMR0)','Seco = 1'],['Normal','CAP_ENTRADA (TMR0)','Seco = 0'],['Alarma','TIMER (TMR2)','Alarma_grave = 1'],['Normal','TIMER (TMR2)','Datos_nuevos = 1'],['Normal','Programa principal (sin interrupción)','Alarma_grave = 0']],['Normal','Seco','Alarma'],['CAP_ENTRADA (TMR0)','TIMER (TMR2)','TIMEOUT (TMR1)','Programa principal (sin interrupción)'],['Seco = 1','Seco = 0','Alarma_grave = 1','Alarma_grave = 0','Datos_nuevos = 1'],['En Normal, el detector pasa a seco.','En Seco, el detector vuelve a húmedo.','En Seco, Retardo llega a 0.','En Normal, Retardo llega a 0.','En Alarma, el operador pulsa reinicio.']),
+   sol:FSM_RIEGO+'<p>La captura en ambos flancos permite usar la misma rutina para entrar y salir de Seco. La salida de Alarma es por sondeo, porque TIMER deja ORI = 0 y el operador se atiende en el bucle principal.</p>'})},
+ {title:'Riego: Plazo y Apertura',random:1,tag:'Problema U6-1, 3.2',gen(){ const H=rnd(0,15),T=rnd(0,15),P=rnd(0,3),R=[3,7,0xB,0xF][P],ap=(R*T)>>4,pl=((15-H)<<9)+(T<<11),t=pl/(66e6/16/240);
+   return {q:`<code>Humedad = $${hex(H,1)}</code>, <code>Temperat = $${hex(T,1)}</code>, <code>PADAT5:4 = ${bin(P,2)}</code>, MCF5272 a 66 MHz y <code>TMR1 = $EF14</code>.`,code:`uint32_t Rapidez[] = {3, 7, 0xB, 0xF};
+Prog     = (*ptrA & 0x30) >> 4;
+Plazo    = ((0xF - Humedad) << 9) + (Temperat << 11);
+Apertura = (Rapidez[Prog] * Temperat) >> 4;`,f:[{k:'a',l:'Apertura',t:'int',a:ap},{k:'p',l:'Plazo',t:'int',a:pl},{k:'t',l:'Tiempo abierta (s)',t:'num',a:t,tol:Math.max(.01,.01*t)}],
+   sol:`<p>Rapidez[${P}] = ${R}. Apertura = (${R} × ${T}) &gt;&gt; 4 = <strong>${ap}</strong>. Plazo = ${15-H} × 512 + ${T} × 2048 = <strong>${pl}</strong>. PS + 1 = 240 y D = 16: f<sub>CONT</sub> = 17187,5 Hz, luego t = ${fnum(t,3)} s.</p>`}; }},
+ {title:'Robot ColdMaze: diagrama de estados',tag:'Examen Ene-2016',gen:fix({q:'<code>MODO</code> vale 0 antes de navegar y 1 durante la navegación. INT1, INT2 e INT3 lanzan RUT_INT, e INT5 lanza RUT_INT5. <code>RUT_INT</code> lee la tabla y espera a que TIEMPO_OPERAC baje a 0.',f:rows('m',[['Navega','Programa principal (sin interrupción)','MODO = 1'],['Gira','RUT_INT (INT1-3)','TIEMPO_OPERAC = tabla'],['Navega','RUT_TIMER1 (TMR1)','TIEMPO_OPERAC = 0'],['Alarma','RUT_INT5 (INT5)','Se queda en BRA ALARMA']],['Espera','Navega','Gira','Alarma'],['Programa principal (sin interrupción)','RUT_INT (INT1-3)','RUT_TIMER1 (TMR1)','RUT_INT5 (INT5)'],['MODO = 1','TIEMPO_OPERAC = tabla','TIEMPO_OPERAC = 0','Se queda en BRA ALARMA'],['En Espera, se pulsa y suelta el botón de PA0.','En Navega, un sensor frontal o lateral detecta pared.','En Gira, el temporizador lleva TIEMPO_OPERAC a 0.','En Navega, los cuatro sensores detectan pared.']),
+   sol:FSM_ROBOT+'<p>De la alarma solo se sale con reset. El retardo de entrada es por sondeo de PA0: la navegación comienza poco después de soltar el botón.</p>'})},
+ {title:'Robot: tiempo de giro',tag:'Examen Ene-2016, 4.1',gen:fix({q:'Se solicitan a la vez los sensores frontal, izquierdo y derecho, con <code>MODO = 1</code>. La última fila de TABLA es <code>DC.W 120,2</code>, y TIMER1 interrumpe cada 25 ms.',f:[{k:'t',l:'Tiempo de giro (s)',t:'num',a:3,tol:.01}],sol:'<p>120 interrupciones × 25 ms = <strong>3 s</strong>. Si MODO = 0, no gira.</p>'})},
+]});
+
+// ===== PRECIOS Y C =====
+TABS.push({id:'c',t:'Precios y C',s:'Cuánto devuelve la función',intro:`<span class="eyebrow">Traza a mano</span><h2>Sigue los tipos: ahí está la trampa</h2>
+ <p>Un <code>uint16_t</code> se trunca módulo 65536 y un <code>uint8_t</code> módulo 256. La división entera trunca, y el orden importa: <code>peso * p / 100</code> no da lo mismo que <code>peso / 100 * p</code>.</p>`,ex:[
+ {title:'¿Cuánto cuesta? Calcula_Precio()',random:1,gen(){ const miss=Math.random()<.2, cod=miss?rnd(7,40):rnd(1,6), peso=rnd(5,900), v=pick([0,0,1,2]), um=pick([100,200,500]), r=precio(cod,peso,v,um);
+   const ret=v===0?'return (Precio) (((uint32_t) peso * aux) / 100);':v===1?'return (Precio) ((peso / 100) * aux);':`Precio p = (Precio) (((uint32_t) peso * aux) / 100);\n    if (peso >= ${um}) p = p - p / 10;   /* Descuento */\n    return p;`;
+   return {q:`Con <code>codigo = ${cod}</code> y <code>peso = $${hex(peso,4)}</code> (${peso}, centésimas de kg), ¿cuánto vale el precio al salir de la función? La tabla (24 bytes por elemento) empieza en $00100000 y el resto de ROM vale $FF.`,code:`/* cod, precio/kg (cent) */  ${PROD.map(p=>`{${p[0]}, ${p[1]}}`).join(' ')}
+
+Precio Calcula_Precio(uint16_t codigo, uint16_t peso)
+{
+    uint8_t *Dir_elem = TABLA_PROD;
+    uint16_t aux;
+    uint8_t i = 0;
+
+    aux = (*Dir_elem << 8) + *(Dir_elem + 1);
+    while ((i < N_PROD) && (aux != codigo)) {
+        Dir_elem = Dir_elem + TAM_ELEM;
+        i++;
+        aux = (*Dir_elem << 8) + *(Dir_elem + 1);
+    }
+    aux = (*(Dir_elem + 2) << 8) + *(Dir_elem + 3);
+
+    ${ret}
+}`,f:[{k:'d',l:'Dir_elem ($)',t:'hex',a:hex(r.dir,8),w:1},{k:'k',l:'aux: precio/kg',t:'int',a:r.pk},{k:'p',l:'Devuelve (céntimos)',t:'int',a:r.p},{k:'c',l:'Cadena ddd.dd',t:'seq',a:cadena(r.p)}],
+     sol:`<p>${miss?`El código no está: el bucle sale con i = 6, en $00100090, y lee $FF: precio/kg = 65535.`:`Elemento ${cod-1}: $00100000 + ${cod-1} × 24 = $${hex(r.dir,8)}, precio/kg = ${r.pk}.`} ${v===1?`peso / 100 = ${Math.floor(peso/100)} (trunca primero).`:`peso × aux / 100 = ${Math.floor(peso*r.pk/100)}.`}${v===2&&peso>=um?' Se aplica el descuento del 10 % con división entera.':''} Tras truncar a 16 bits: <strong>${r.p} céntimos</strong>, que se imprime como <code>${cadena(r.p)}</code>. El formato no llega a 999,99 €: el máximo real es 655,35 €.</p>`}; }},
+ {title:'Total de la compra',random:1,gen(){ const a=[rnd(1,6),rnd(100,900)],b=[rnd(1,6),rnd(100,900)],c=[rnd(1,6),rnd(100,900)]; const p=[a,b,c].map(x=>precio(x[0],x[1]).p), tot=p.reduce((s,x)=>(s+x)&0xFFFF,0);
+   return {q:`Se compran tres productos: ${[a,b,c].map(x=>`código ${x[0]} con peso ${x[1]}`).join('; ')}. TOTAL es un <code>DS.W</code> y el precio es peso × precio/kg / 100.`,f:[{k:'a',l:'Producto 1',t:'int',a:p[0]},{k:'b',l:'Producto 2',t:'int',a:p[1]},{k:'c',l:'Producto 3',t:'int',a:p[2]},{k:'t',l:'TOTAL (céntimos)',t:'int',a:tot}],sol:`<p>${p.join(' + ')} = ${p[0]+p[1]+p[2]}. Con 16 bits: <strong>${tot}</strong>${p[0]+p[1]+p[2]>65535?' (se ha envuelto módulo 65536)':''}.</p>`}; }},
+ {title:'Paso por valor o por referencia',random:1,gen(){ const a=rnd(2,9),b=rnd(2,9),T=[
+   {c:`void f(int x, int *p) {\n    int aux = x;\n    x += *p;\n    *p = aux * aux;\n}\n...\nint a = ${a}, b = ${b};\nf(a, &b);`,a,b:a*a,e:'x es una copia, luego a no cambia. *p escribe en b: aux × aux.'},
+   {c:`void f(int x, int *p) {\n    *p = *p + x;\n    x = 0;\n}\n...\nint a = ${a}, b = ${b};\nf(a, &b);`,a,b:b+a,e:'x = 0 solo cambia la copia. b suma a.'},
+   {c:`void f(int x, int y) {\n    int t = x;\n    x = y;\n    y = t;\n}\n...\nint a = ${a}, b = ${b};\nf(a, b);`,a,b,e:'Las dos son copias: nada cambia fuera.'},
+   {c:`void f(int *p, int *q) {\n    int t = *p;\n    *p = *q;\n    *q = t;\n}\n...\nint a = ${a}, b = ${b};\nf(&a, &b);`,a:b,b:a,e:'Con punteros sí se intercambian.'}][rnd(0,3)];
+   return {q:'¿Cuánto valen a y b tras la llamada?',code:T.c,f:[{k:'a',l:'a',t:'int',a:T.a},{k:'b',l:'b',t:'int',a:T.b}],sol:`<p>a = <strong>${T.a}</strong>, b = <strong>${T.b}</strong>. ${T.e}</p>`}; }},
+ {title:'Tipos, máscaras y desplazamientos',random:1,gen(){ const x=rnd(0,255),n=rnd(1,4),T=[
+   {c:`uint8_t x = ${x};\nx = x + 100;`,a:(x+100)&255,e:'uint8_t: módulo 256.'},
+   {c:`uint8_t x = 0x${hex(x,2)};\nuint8_t y = (x >> 4) & 0x3;`,a:(x>>4)&3,e:'Se desplaza y se queda con 2 bits.'},
+   {c:`uint8_t x = 0x${hex(x,2)};\nuint8_t y = x & 0xF0;`,a:x&0xF0,e:'La máscara conserva el nibble alto.'},
+   {c:`uint8_t x = 0x${hex(x,2)};\nuint8_t y = x | 0x10;`,a:x|0x10,e:'OR pone a 1 el bit 4.'},
+   {c:`uint8_t x = 0x${hex(x,2)};\nuint8_t y = x & 0xEF;`,a:x&0xEF,e:'AND pone a 0 el bit 4.'},
+   {c:`uint16_t x = ${x};\nuint16_t y = x << ${n};`,a:x<<n,e:`Equivale a multiplicar por ${2**n}.`},
+   {c:`int8_t x = ${x>127?x-256:x};\nint8_t y = x >> ${n};   /* desplazamiento aritmético */`,a:(x>127?x-256:x)>>n,e:'Con signo se conserva el bit de signo.'}][rnd(0,6)];
+   return {q:'¿Cuánto vale la variable final (x o y), en decimal?',code:T.c,f:[{k:'v',l:'Valor',t:'int',a:T.a}],sol:`<p><strong>${T.a}</strong>. ${T.e}</p>`}; }},
+ {title:'Bucles con máscara',random:1,gen(){ const d=rnd(1,255), ones=d.toString(2).split('1').length-1;
+   return {q:`<code>aux_data = $${hex(d,2)}</code>. ¿Cuánto vale <code>n</code> al terminar, y cuántas veces se ejecuta el bucle?`,code:`uint8_t mask = 0x80;
+int8_t i;
+uint8_t n = 0;
+for (i = 7; i >= 0; i--) {
+    if ((mask & aux_data) != 0) n += 1;
+    mask = mask >> 1;
+}`,f:[{k:'n',l:'n',t:'int',a:ones},{k:'v',l:'Vueltas',t:'int',a:8}],sol:`<p>Recorre los 8 bits, de 7 a 0, y cuenta los unos de ${bin(d,8)}: <strong>${ones}</strong>. Si <code>i</code> fuera <code>uint8_t</code>, <code>i &gt;= 0</code> sería siempre cierto y el bucle no terminaría.</p>`}; }},
+ {title:'funcionA',tag:'Examen Ene-2016, 6.1',gen:fix({q:'¿Cuánto valen varA y varB tras la llamada?',code:`void funcionA(int varA, int *puntB) {
+    int aux = varA;
+    varA += *puntB;
+    *puntB = aux * aux;
+}
+...
+int varA = 3;
+int varB = 4;
+funcionA(varA, &varB);`,f:[{k:'a',l:'varA',t:'int',a:3},{k:'b',l:'varB',t:'int',a:9}],sol:'<p>varA se pasa por valor y sigue en <strong>3</strong>. varB se pasa por referencia: 3 × 3 = <strong>9</strong>.</p>'})},
+ {title:'mask_data en actualiza_tiempos()',tag:'Problema U4-1 en C',gen:fix({q:'Se recorre PData con <code>mask_data = 0x80</code> y <code>mask_data = mask_data &gt;&gt; 1</code> en cada vuelta, con <code>i</code> de 7 a 0. <code>T_carrera</code> es <code>uint32_t</code> y cuenta ms.',f:[{k:'a',l:'¿Para qué sirve mask_data?',t:'sel',o:[['a','Aislar el bit de la calle i'],['b','Contar vueltas'],['c','Guardar el tiempo']],a:'a'},{k:'b',l:'Máscara en la vuelta i = 5 ($)',t:'hex',a:'20'},{k:'c',l:'Tiempo máximo (días)',t:'num',a:49.7,tol:.1}],sol:'<p>Cada vuelta mira un sensor: i = 7 → $80, i = 6 → $40, i = 5 → <strong>$20</strong>. Sin el desplazamiento se miraría siempre la calle 7. 2³² ms ≈ <strong>49,7 días</strong>.</p>'})},
+]});
+
+// ===== SALTOS =====
+TABS.push({id:'cmp',t:'Saltos y CMP',s:'d < f, con y sin signo',intro:`<span class="eyebrow">Recuerda</span><h2><code>CMP f,d</code> calcula d − f</h2>
+ <p>En <code>CMP.L D1,D0</code> el destino d es <strong>D0</strong> y la fuente f es D1. Si d &lt; f: <strong>BCS</strong> sin signo y <strong>BLT</strong> con signo. BLT comprueba N ≠ V; BCS comprueba C = 1.</p>`,ex:[
+ {title:'¿Salta? Con banderas',random:1,gen(){ const pool=[0,1,2,5,0x7F,0x80,0x100,0x7FFFFFFF,0x80000000,0xFFFFFFFF,0xFFFFFFFE,0xFFFFFF00]; let d=pick(pool),f=pick(pool); if(Math.random()<.15) f=d; const b=pick(Object.keys(BR)), x=cmpFlags(d,f), j=!!BR[b](x);
+   return {q:'Calcula las banderas tras CMP e indica si se produce el salto.',code:`        MOVE.L  #$${hex(d,8)},D0
+        MOVE.L  #$${hex(f,8)},D1
+        CMP.L   D1,D0
+        ${b}     DESTINO`,f:[{k:'n',l:'N',t:'bin',a:String(x.N)},{k:'z',l:'Z',t:'bin',a:String(x.Z)},{k:'v',l:'V',t:'bin',a:String(x.V)},{k:'c',l:'C',t:'bin',a:String(x.C)},{k:'j',l:`¿Salta ${b}?`,t:'sel',o:SINO,a:j?'si':'no'}],
+     sol:`<p>d = D0 y f = D1. d − f = $${hex(d-f,8)}: N = ${x.N}, Z = ${x.Z}, V = ${x.V}, C = ${x.C}. ${b} <strong>${j?'salta':'no salta'}</strong>.</p>`}; }},
+ {title:'Elegir el salto',random:1,gen(){ const c=pick([['d < f','BCS','BLT'],['d > f','BHI','BGT'],['d ≥ f','BCC','BGE'],['d ≤ f','BLS','BLE']]), s=pick([0,1]), ty=s?'int32_t':'uint32_t', [D,F]=pick([['D0','D1'],['D2','D3'],['D1','D4']]), br=c[s?2:1], all=['BCS','BLT','BHI','BGT','BCC','BGE','BLS','BLE','BEQ','BNE'];
+   return {q:`Las variables <code>${D}</code> y <code>${F}</code> son <code>${ty}</code>. Tras <code>CMP.L ${F},${D}</code>, ¿qué instrucción salta si <strong>${D} ${c[0].slice(2,3)} ${F}</strong>?`,f:[{k:'b',l:'Instrucción',t:'sel',o:all.map(x=>[x,x]),a:br}],sol:`<p>Aquí d = ${D} y f = ${F}. Para ${c[0]} ${s?'con signo':'sin signo'}: <strong>${br}</strong>.</p>`}; }},
+ {title:'Sentido contrario',random:1,gen(){ const c=pick([['<','BLT','BCS'],['>','BGT','BHI'],['≥','BGE','BCC'],['≤','BLE','BLS']]), s=pick([0,1]), inv={'<':'>','>':'<','≥':'≤','≤':'≥'}[c[0]], m={'<':['BCS','BLT'],'>':['BHI','BGT'],'≥':['BCC','BGE'],'≤':['BLS','BLE']}, br=m[inv][s];
+   return {q:`Con valores ${s?'con signo':'sin signo'}, tras <code>CMP.L D0,D1</code> (fuente D0, destino D1), ¿qué salto se ejecuta si <strong>D0 ${c[0]} D1</strong>?`,f:[{k:'b',l:'Instrucción',t:'sel',o:['BCS','BLT','BHI','BGT','BCC','BGE','BLS','BLE'].map(x=>[x,x]),a:br}],sol:`<p>D0 ${c[0]} D1 es lo mismo que d ${inv} f con d = D1. Por eso es <strong>${br}</strong>.</p>`}; }},
+ {title:'TST',random:1,gen(){ const c=pick([['d = 0','BEQ',['BEQ']],['d ≠ 0','BNE',['BNE']],['d > 0','BGT',['BGT']],['d ≥ 0','BGE',['BGE','BPL']],['d < 0','BLT',['BLT','BMI']],['d ≤ 0','BLE',['BLE']]]);
+   return {q:`Tras <code>TST.L D0</code>, con D0 con signo, ¿qué salto se usa si <strong>${c[0]}</strong>?`,f:[{k:'b',l:'Instrucción',t:'txt',a:c[1],alt:c[2],ph:'BXX'}],sol:`<p><strong>${c[2].join(' o ')}</strong>.</p>`}; }},
+ {title:'Trampa del signo',tag:'Criterio',gen:fix({q:'<code>D0 = $FFFFFFFF</code> y <code>D1 = 1</code>, tras <code>CMP.L D1,D0</code>.',f:[{k:'a',l:'¿D0 < D1 con signo?',t:'sel',o:SINO,a:'si'},{k:'b',l:'¿Salta BLT?',t:'sel',o:SINO,a:'si'},{k:'c',l:'¿D0 < D1 sin signo?',t:'sel',o:SINO,a:'no'},{k:'d',l:'¿Salta BCS?',t:'sel',o:SINO,a:'no'}],sol:'<p>Con signo, D0 = −1 &lt; 1. Sin signo, D0 = 4 294 967 295 &gt; 1. El mismo CMP, dos respuestas: depende de la instrucción de salto.</p>'})},
+]});
+
+// ===== TEST =====
+const QUIZ=[
+ ['¿Cuántos niveles de prioridad admite el MCF5272?',['7, del 1 al 7; 000 inhabilita','8, del 0 al 7, todos activos','4','16'],'xIPL va de 001 a 111; el valor 000 inhabilita.'],
+ ['¿Qué nivel no se puede enmascarar?',['El 7','El 1','El 0','Ninguno'],'Con máscara 7, solo se acepta el nivel 7.'],
+ ['Una interrupción de nivel 4 llega con máscara 4. ¿Qué pasa?',['Queda pendiente','Se atiende','Se pierde','Reinicia el sistema'],'Se acepta solo si N > máscara.'],
+ ['Al entrar en una rutina de nivel 5, la máscara pasa a…',['5','0','7','No cambia'],'Se copia el nivel en I2I1I0. Solo interrumpe un nivel mayor.'],
+ ['¿Qué recupera la máscara al salir?',['RTE, al recuperar el SR de la pila','RTS','Escribir en ICR','Nada: se queda'],'RTE restaura SR y PC.'],
+ ['¿Qué tamaño tiene la trama que apila el procesador?',['8 bytes: PC, SR y Vector/Format','4 bytes','6 bytes','12 bytes'],'PC (4) + SR (2) + Vector/Format (2).'],
+ ['Si A7 no está alineado a long cuando llega una interrupción…',['Se alinea automáticamente antes de apilar','Da error de dirección','Se pierde','Se apilan 9 bytes siempre'],'La pila se alinea en límite de long, y RTE restaura A7.'],
+ ['INT1 e INT3 tienen el mismo nivel y llegan a la vez. ¿Cuál va primero?',['INT1','INT3','Se pierden','La última en configurarse'],'Se ordenan según las fuentes: de INT1 a SWTO.'],
+ ['¿Qué hay que hacer con el bit xPI de una INT externa al atenderla?',['Ponerlo a 0 escribiendo un 1','Escribir un 0','Nada','Leer ISR'],'Por eso se ve ANDI con solo ese nibble: PI = 1 borra esa fuente; las demás, con PI = 0, no cambian de nivel.'],
+ ['En un timer, ¿cómo se borra el aviso de la interrupción?',['Escribiendo un 1 en el bit REF o CAP de TERn','Escribiendo en TMRn','Escribiendo 0 en ICR1','Solo con RTE'],'En los timers se usan los bits de TERn, en vez de TMRnPI de ICR1.'],
+ ['¿Para qué valor de PIVR queda el primer vector de usuario en el vector 64?',['$40','$20','$80','$64'],'64 = $40, el valor típico.'],
+ ['¿Qué significa un bit a 0 en ISR?',['La línea está a nivel alto','La línea está a nivel bajo','Interrupción inhabilitada','Sin pendiente'],'En ISR, nivel alto = 0 y nivel bajo = 1. Por eso se hace NOT.'],
+ ['¿Qué configura PITR?',['El flanco de INT1-INT6','El nivel','El vector','El periodo'],'1 = subida, 0 = bajada.'],
+ ['Con FRR = 0, tras alcanzar TRR el contador…',['Sigue contando (modo continuo)','Se reinicia a 0','Se para siempre','Da error'],'FRR = 1 es reinicio; para interrupción periódica usa FRR = 1.'],
+ ['Rango máximo de un timer a 66 MHz:',['Unos 4,07 s','1 s','65 ms','66 s'],'16 × 256 × 65536 ciclos / 66 MHz.'],
+ ['Para medir 10 minutos con un timer…',['Se cuentan interrupciones por programa','Se usa PS mayor de 256','Se usa TRR de 32 bits','No se puede'],'Se configura periódica y se cuenta en la rutina.'],
+ ['¿Qué timers tienen salida TOUT?',['TIMER0 y TIMER1','Todos','Solo TIMER3','Ninguno'],'TOUT0 y TOUT1.'],
+ ['¿Qué bit de XSR indica "preparado para transmitir"?',['TE (bit 5)','TX (bit 1)','RX (bit 0)','OV (bit 4)'],'Se espera a TE antes de escribir XDAT.'],
+ ['¿Qué calcula CMP.L D1,D0?',['D0 − D1, sin guardar el resultado','D1 − D0','D0 + D1','Guarda en D0'],'CMP f,d hace d − f y solo cambia las banderas.'],
+ ['Si los números son sin signo, ¿qué salto equivale a d < f?',['BCS','BLT','BMI','BGT'],'Sin signo se mira C.'],
+];
+TABS.push({id:'test',t:'Test rápido',s:'Conceptos',quiz:1});
+const P2={OFF,icrValue,vectorAddr,pivrFrom,orderFromIcr1,pitr,a7After,tmr,tmrDecode,tIrq,pwcr,fPwm,ckslClosest,ckslAbove,xcr,xcrDecode,frameLen,frameBits,cmpFlags,BR,precio,cadena,TABS,QUIZ,check};
+window.P2=P2;
+
+// ---------- corrección ----------
+function check(f,val){ const s=String(val===undefined||val===null?'':val).trim(); if(s==='') return false; const t=f.t;
+  if(t==='hex') return normHex(s)===normHex(f.a);
+  if(t==='int') return s.replace(/[\s.]/g,'')===String(f.a);
+  if(t==='num'){ const x=parseFloat(s.replace(/[\s]/g,'').replace(',','.')); return Number.isFinite(x)&&Math.abs(x-f.a)<=(f.tol===undefined?1e-9:f.tol)+1e-9; }
+  if(t==='sel') return s===f.a;
+  if(t==='bin'){ const x=s.replace(/^%/,''); return /^[01]+$/.test(x)&&parseInt(x,2)===parseInt(f.a,2); }
+  if(t==='seq') return s.replace(/[\s"]/g,'').replace(',','.').toUpperCase()===String(f.a).toUpperCase();
+  if(t==='txt') return (f.alt||[f.a]).includes(s.toUpperCase());
+  return false; }
+
+// ---------- render ----------
+let streak=0;
+const main=document.getElementById('main'), rail=document.getElementById('rail');
+const setStreak=()=>document.getElementById('streak').textContent=streak;
+const ph={hex:'hex',int:'decimal',num:'número',bin:'bits',seq:'texto',txt:''};
+function fieldHtml(f){ const hd=f.head?`<div class="casehead">${f.head}</div>`:''; const cls='field'+(f.w||f.t==='seq'?' ':''), st=(f.w||f.t==='seq')?' style="min-width:170px"':'';
+  const inner=f.t==='sel'?`<select data-k="${f.k}"><option value="">— elige —</option>${f.o.map(o=>`<option value="${esc(o[0])}">${esc(o[1])}</option>`).join('')}</select>`:`<input data-k="${f.k}" placeholder="${f.ph||ph[f.t]}" autocomplete="off" spellcheck="false">`;
+  return `${hd}<div class="${cls}"${st}><label>${f.l}</label>${inner}</div>`; }
+function renderEx(card,def){ const d=def.gen(); card._d=d; const tag=def.random?`<span class="tag gen">Generador${def.tag?' · '+def.tag:''}</span>`:`<span class="tag">${def.tag||'Fijo'}</span>`;
+  card.innerHTML=`<div class="ex-head"><h3>${def.title}</h3>${tag}</div><p>${d.q}</p>${d.code?code(d.code):''}
+   <div class="fields">${d.f.map(fieldHtml).join('')}</div>
+   <div class="btnrow"><button class="btn primary" data-a="check">Corregir</button>${def.random?'<button class="btn" data-a="new">Otro</button>':''}<span class="chip" data-chip>sin corregir</span></div>
+   <details class="solution"><summary>Ver solución</summary><div class="body">${d.sol}</div></details>`; }
+function doCheck(card){ const d=card._d; let n=0; d.f.forEach(f=>{ const e=card.querySelector(`[data-k="${f.k}"]`); const ok=check(f,e.value); e.classList.remove('ok','bad'); e.classList.add(ok?'ok':'bad'); if(ok)n++; });
+  const chip=card.querySelector('[data-chip]'), full=n===d.f.length; chip.textContent=`${n} / ${d.f.length}`; chip.className='chip '+(full?'okc':'badc');
+  if(full&&!card._counted){ card._counted=true; streak++; setStreak(); }
+  card.querySelector('details.solution').open=true; }
+TABS.forEach((T,ti)=>{
+  const b=document.createElement('button'); b.className='rail-btn'+(ti===0?' active':''); b.dataset.tab=T.id; b.innerHTML=`<span class="t">${T.t}</span><span class="s">${T.s}</span>`; rail.appendChild(b);
+  const sec=document.createElement('section'); sec.className='panel'+(ti===0?' active':''); sec.id='tab-'+T.id; main.appendChild(sec);
+  if(T.quiz){ const c=document.createElement('div'); c.className='card'; sec.appendChild(c); initQuiz(c); return; }
+  const intro=document.createElement('div'); intro.className='card'; intro.innerHTML=T.intro; sec.appendChild(intro);
+  const h=document.createElement('div'); h.className='card'; h.innerHTML=HOJA; sec.appendChild(h);
+  T.ex.forEach(def=>{ const c=document.createElement('div'); c.className='card'; sec.appendChild(c); renderEx(c,def);
+    c.addEventListener('click',e=>{ const bt=e.target.closest('button'); if(!bt)return; if(bt.dataset.a==='check') doCheck(c); if(bt.dataset.a==='new'){ c._counted=false; renderEx(c,def);} }); });
+});
+rail.addEventListener('click',e=>{ const b=e.target.closest('.rail-btn'); if(!b)return; rail.querySelectorAll('.rail-btn').forEach(x=>x.classList.remove('active')); main.querySelectorAll('.panel').forEach(x=>x.classList.remove('active')); b.classList.add('active'); document.getElementById('tab-'+b.dataset.tab).classList.add('active'); window.scrollTo(0,0); });
+
+function initQuiz(c){ const shuffle=a=>{ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=rnd(0,i); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+  let order,qi,score; const start=()=>{ order=shuffle(QUIZ.map((_,i)=>i)); qi=0; score=0; draw(); };
+  function draw(){ const q=QUIZ[order[qi]], opts=shuffle(q[1].map((t,i)=>({t,ok:i===0})));
+    c.innerHTML=`<div class="btnrow" style="margin:0 0 12px"><span class="scorepill">Pregunta <strong>${qi+1}</strong> / ${QUIZ.length}</span><span class="scorepill">Aciertos: <strong>${score}</strong></span><button class="btn" data-r style="margin-left:auto">Reiniciar</button></div><div class="quiz-q">${esc(q[0])}</div><div class="quiz-opts">${opts.map((o,i)=>`<button class="quiz-opt" data-o="${i}">${esc(o.t)}</button>`).join('')}</div><div data-exp></div>`;
+    c.querySelector('[data-r]').onclick=start;
+    c.querySelectorAll('.quiz-opt').forEach(b=>b.onclick=()=>{ const o=opts[+b.dataset.o]; if(o.ok)score++; c.querySelectorAll('.quiz-opt').forEach(x=>{ x.disabled=true; if(opts[+x.dataset.o].ok) x.classList.add('ok'); }); if(!o.ok) b.classList.add('bad'); c.querySelector('[data-exp]').innerHTML=`<div class="quiz-exp">${esc(q[2])}</div>${qi<QUIZ.length-1?'<div class="btnrow"><button class="btn primary" data-n>Siguiente</button></div>':`<p style="margin-top:12px"><strong>Resultado: ${score} / ${QUIZ.length}</strong></p>`}`; const n=c.querySelector('[data-n]'); if(n) n.onclick=()=>{ qi++; draw(); }; }); }
+  start(); }
+})();
+</script>
+</html>
